@@ -644,8 +644,8 @@ class WaymoToKITTI(object):
             # print(segment_class)
         
             # with open(cur_det_file, 'a') as f:
-            print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt')
-            with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
+            print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt')
+            with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
                         # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
 
                 if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
