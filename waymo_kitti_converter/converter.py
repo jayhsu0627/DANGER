@@ -126,7 +126,6 @@ class WaymoToKITTI(object):
         self.point_cloud_save_dir = self.save_dir + '/velodyne'
         self.pose_save_dir        = self.save_dir + '/pose'
         self.pvp_save_dir         = self.save_dir + '/scenegt'
-
         self.create_folder()
 
     def convert(self):
@@ -172,8 +171,8 @@ class WaymoToKITTI(object):
             # parse calibration files
             self.save_calib(frame, file_idx, frame_idx)
 
-            # parse point clouds
-            self.save_lidar(frame, file_idx, frame_idx)
+            # # parse point clouds
+            # self.save_lidar(frame, file_idx, frame_idx)
 
             # parse label files
             self.save_label(frame, file_idx, frame_idx)
@@ -199,6 +198,7 @@ class WaymoToKITTI(object):
             img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             plt.imsave(img_path, rgb_img, format='png')
+            break # output first camera only
 
     def save_calib(self, frame, file_idx, frame_idx):
         """ parse and save the calibration data
@@ -278,7 +278,8 @@ class WaymoToKITTI(object):
         identity_3x4 = np.eye(4)[:3, :]
 
         # although waymo has 5 cameras, for compatibility, we produces 4 P
-        for i in range(4):
+        for i in range():
+        # for i in range(4):
             if i == 2:
                 # note: front camera is labeled camera 2 (kitti) or camera 0 (waymo)
                 #   other Px are given dummy values. this is to ensure compatibility. They are seldom used anyway.
@@ -670,11 +671,13 @@ class WaymoToKITTI(object):
                 pass
 
     def create_folder(self):
-        for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
+        # for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
+        for d in [self.label_all_save_dir, self.calib_save_dir, self.pose_save_dir, self.pvp_save_dir]:
             if not isdir(d):
                 os.makedirs(d)
         for d in [self.label_save_dir, self.image_save_dir]:
             for i in range(5):
+            # for i in range(0):
                 if not isdir(d + str(i)):
                     os.makedirs(d + str(i))
 
