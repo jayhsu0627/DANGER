@@ -134,7 +134,7 @@ class WaymoToKITTI(object):
             r = list(tqdm.tqdm(p.imap(self.convert_one, range(len(self))), total=len(self)))
         print("\nfinished ...")
 
-    def _pad_to_common_shape(label):
+    def _pad_to_common_shape(self,label):
         return np.pad(label, [[1280 - label.shape[0], 0], [0, 0], [0, 0]])
 
     def convert_one(self, file_idx):
