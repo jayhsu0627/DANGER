@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import tensorflow.compat.v1 as tf
+
 import tqdm
 from multiprocessing import Pool
 from os.path import join, isdir
@@ -15,6 +17,34 @@ from waymo_open_dataset import dataset_pb2
 from waymo_open_dataset.utils import range_image_utils
 from waymo_open_dataset.utils import transform_utils
 
+import math
+import sys
+import numpy
+numpy.set_printoptions(threshold=sys.maxsize)
+
+from waymo_open_dataset.utils import  frame_utils
+
+from matplotlib import patches
+from waymo_open_dataset import label_pb2
+from waymo_open_dataset.camera.ops import py_camera_model_ops
+from waymo_open_dataset.metrics.ops import py_metrics_ops
+from waymo_open_dataset.metrics.python import config_util_py as config_util
+from waymo_open_dataset.protos import breakdown_pb2
+from waymo_open_dataset.protos import metrics_pb2
+from waymo_open_dataset.protos import submission_pb2
+from waymo_open_dataset.utils import box_utils
+
+import itertools
+import immutabledict
+
+if not tf.executing_eagerly():
+  tf.compat.v1.enable_eager_execution()
+
+from waymo_open_dataset.utils import camera_segmentation_utils
+
+tf.enable_eager_execution()
+
+             
 # Abbreviations:
 # WOD: Waymo Open Dataset
 # FOV: field of view
@@ -64,6 +94,16 @@ class WaymoToKITTI(object):
 
         self.lidar_list = ['_FRONT', '_FRONT_RIGHT', '_FRONT_LEFT', '_SIDE_RIGHT', '_SIDE_LEFT']
         self.type_list = ['UNKNOWN', 'VEHICLE', 'PEDESTRIAN', 'SIGN', 'CYCLIST']
+        output_path = '/content/'
+        self.class_list =['Undefined','Ego_vehicle','Car','Truck','Bus','Other_large_vehicle','Bicycle',
+             'Motorcycle','Trailer','Pedestrian','Cyclist','Motorcyclist','Bird','Ground_animal',
+             'Construction_cone_pole','Pole','Pedestrian_object','Sign','Traffic_light','Building',
+             'Road','Lane_marker','Road_marker','Sidewalk','Vegetation','Sky','Ground','Dynamic','Static']
+        self.class_color_list =[[0, 0, 0],[102, 102, 102],[0, 0, 142],[0, 0, 70],[0, 60, 100],[61, 133, 198],[119, 11, 32],
+                                [0, 0, 230],[111, 168, 220],[220, 20, 60],[255, 0, 0],[180, 0, 0],[127, 96, 0],[91, 15, 0],
+                                [230, 145, 56],[153, 153, 153],[234, 153, 153],[246, 178, 107],[250, 170, 30],[70, 70, 70],
+                                [128, 64, 128],[234, 209, 220],[217, 210, 233],[244, 35, 232],[107, 142, 35],[70, 130, 180],[102, 102, 102],[102, 102, 102],[102, 102, 102]]
+
         self.waymo_to_kitti_class_map = {
             'UNKNOWN': 'DontCare',
             'PEDESTRIAN': 'Pedestrian',
@@ -85,6 +125,7 @@ class WaymoToKITTI(object):
         self.calib_save_dir       = self.save_dir + '/calib'
         self.point_cloud_save_dir = self.save_dir + '/velodyne'
         self.pose_save_dir        = self.save_dir + '/pose'
+        self.pvp_save_dir         = self.save_dir + '/scenegt'
 
         self.create_folder()
 
@@ -94,10 +135,30 @@ class WaymoToKITTI(object):
             r = list(tqdm.tqdm(p.imap(self.convert_one, range(len(self))), total=len(self)))
         print("\nfinished ...")
 
+    def _pad_to_common_shape(label):
+        return np.pad(label, [[1280 - label.shape[0], 0], [0, 0], [0, 0]])
+
     def convert_one(self, file_idx):
         pathname = self.tfrecord_pathnames[file_idx]
         dataset = tf.data.TFRecordDataset(pathname, compression_type='')
         
+        # file name with extension
+        file_name = os.path.basename(pathname)
+
+        # file name without extension
+        segment_name = os.path.splitext(file_name)[0]
+        print(segment_name)
+
+        # Avoid repeat object id in the output text file
+        frame_obj_id = []
+        # Avoid repeat segmentation class in the output text file
+        segment_class = []
+
+        # if output_path is not None:
+        # cur_det_file = output_path + ('%s_clone_scenegt_rgb_encoding.txt' % segment_name)
+        # if os.path.exists(cur_det_file):
+        #     os.remove(cur_det_file)
+
         for frame_idx, data in enumerate(dataset):
 
             frame = open_dataset.Frame()
@@ -111,14 +172,17 @@ class WaymoToKITTI(object):
             # parse calibration files
             self.save_calib(frame, file_idx, frame_idx)
 
-            # # parse point clouds
-            # self.save_lidar(frame, file_idx, frame_idx)
+            # parse point clouds
+            self.save_lidar(frame, file_idx, frame_idx)
 
             # parse label files
             self.save_label(frame, file_idx, frame_idx)
 
             # parse pose files
             self.save_pose(frame, file_idx, frame_idx)
+
+            # parse 2D Panoramic Video Panoptic Segmentation files
+            self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
 
     def __len__(self):
         return len(self.tfrecord_pathnames)
@@ -442,8 +506,6 @@ class WaymoToKITTI(object):
 
         fp_label_all.close()
 
-        # print(file_idx, frame_idx)
-
     def save_pose(self, frame, file_idx, frame_idx):
         """ Save self driving car (SDC)'s own pose
 
@@ -456,6 +518,156 @@ class WaymoToKITTI(object):
         pose = np.array(frame.pose.transform).reshape(4,4)
         np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
 
+    def save_2D_semantic(self, frame, file_idx, frame_idx, frame_obj_id, segment_class):
+
+        """ parse and save the front camera's instance-level segmentation images in png format
+                :param frame: open dataset frame proto
+                :param file_idx: the current file number
+                :param frame_idx: the current frame number
+                :return:
+        """
+        frames_with_seg = []
+        sequence_id = None
+
+        # Save frames which contain CameraSegmentationLabel messages. We assume that
+        # if the first image has segmentation labels, all images in this frame will.
+        if frame.images[0].camera_segmentation_label.panoptic_label:
+        # print(frame.images[0].camera_segmentation_label)
+            frames_with_seg.append(frame)
+
+
+        # if sequence_id is None:
+        #   sequence_id = frame.images[0].camera_segmentation_label.sequence_id
+        # # Collect 3/5 frames for this demo. However, any number can be used in practice.
+        # if frame.images[0].camera_segmentation_label.sequence_id != sequence_id or len(frames_with_seg) > 4:
+        #   break
+
+        camera_front_only = [open_dataset.CameraName.FRONT]
+
+        segmentation_protos_ordered = []
+        for frame in frames_with_seg:
+            segmentation_proto_dict = {image.name : image.camera_segmentation_label for image in frame.images}
+            segmentation_protos_ordered.append([segmentation_proto_dict[name] for name in camera_front_only])
+
+            # The dataset provides tracking for instances between cameras and over time.
+            # By setting remap_values=True, this function will remap the instance IDs in
+            # each image so that instances for the same object will have the same ID between
+            # different cameras and over time.
+            segmentation_protos_flat = sum(segmentation_protos_ordered, [])
+            panoptic_labels, is_tracked_masks, panoptic_label_divisor = camera_segmentation_utils.decode_multi_frame_panoptic_labels_from_protos(
+                segmentation_protos_flat, remap_values=True
+            )
+
+            # print('panoptic_labels:',len(panoptic_labels),'at frame', frame_idx+1)
+
+            # We can further separate the semantic and instance labels from the panoptic
+            # labels.
+            NUM_CAMERA_FRAMES = 1
+            semantic_labels_multiframe = []
+            instance_labels_multiframe = []
+            semantic_labels = []
+            instance_labels = []
+            
+            for i in range(0, len(segmentation_protos_flat), NUM_CAMERA_FRAMES):
+                semantic_labels = []
+                instance_labels = []
+                for j in range(NUM_CAMERA_FRAMES):
+                    semantic_label, instance_label = camera_segmentation_utils.decode_semantic_and_instance_labels_from_panoptic_label(panoptic_labels[i + j], panoptic_label_divisor)
+                    semantic_labels.append(semantic_label)
+                    instance_labels.append(instance_label)
+                semantic_labels_multiframe.append(semantic_labels)
+                instance_labels_multiframe.append(instance_labels)
+
+                # Pad labels to a common size so that they can be concatenated.
+                instance_labels = [[self._pad_to_common_shape(label) for label in instance_labels] for instance_labels in instance_labels_multiframe]
+                semantic_labels = [[self._pad_to_common_shape(label) for label in semantic_labels] for semantic_labels in semantic_labels_multiframe]
+                instance_labels = [np.concatenate(label, axis=1) for label in instance_labels]
+                semantic_labels = [np.concatenate(label, axis=1) for label in semantic_labels]
+
+                instance_label_concat = np.concatenate(instance_labels, axis=0)
+                semantic_label_concat = np.concatenate(semantic_labels, axis=0)
+                panoptic_label_rgb = camera_segmentation_utils.panoptic_label_to_rgb(
+                    semantic_label_concat, instance_label_concat)
+                semantic_label_rgb = camera_segmentation_utils.semantic_label_to_rgb(
+                    semantic_label_concat)
+
+        # plt.figure(figsize=(16, 15))
+        # plt.imshow(tf.image.decode_jpeg(frame.images[0].image))
+
+        query_id = 1
+
+        # Car 2; Pedestrain 9
+        query_class_1 = 2
+        query_class_2 = 2
+
+        # Find segmentation for instance ID
+        mask_id = instance_label_concat.copy()
+        mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+        # print(mask_id.shape)
+        mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+        mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
+
+        # Find class
+        mask_class = semantic_label_concat.copy()
+        mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
+        # print(mask_class.shape)
+        mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
+        mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
+
+        # new_panoptic_label_rgb = panoptic_label_rgb
+        new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
+        # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
+
+        pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
+        # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
+        # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        plt.imsave(pvp_path, panoptic_label_rgb, format='png')
+
+        # plt.grid(False)
+        # plt.axis('off')
+        # plt.show()
+
+        # print('semantic_label: ',list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:])
+        
+        ## All objects!
+        # frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+        # Only car objects!
+        frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+        # print('instance_label: ',frame_instance_id)
+
+        # frame_semantic_class = list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:]
+        frame_semantic_class = [_ for _ in range(29) if (_!= query_class_1) and (_!= query_class_2)]
+
+        print(frame_obj_id)
+        print(segment_class)
+    
+        # with open(cur_det_file, 'a') as f:
+        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
+                    # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
+
+            if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
+                print('Category(:id) r g b',file=f)
+            for class_indice in frame_semantic_class:
+                class_name = self.class_list[class_indice]
+                r = self.class_color_list[class_indice][0]
+                g = self.class_color_list[class_indice][1]
+                b = self.class_color_list[class_indice][2]
+                if (class_indice not in segment_class) and (class_indice!= query_class_1) and (class_indice!= query_class_2):
+                    print('%s %d %d %d'% (class_name, r, g, b), file=f)
+                segment_class.append(class_indice)
+            for id in frame_instance_id:
+                id_index_0 = np.where(instance_label_concat == id)[0][0]
+                id_index_1 = np.where(instance_label_concat == id)[1][0]
+                class_name = self.class_list[semantic_label_concat[id_index_0,id_index_1,0]]
+                r = panoptic_label_rgb[id_index_0,id_index_1][0]
+                g = panoptic_label_rgb[id_index_0,id_index_1][1]
+                b = panoptic_label_rgb[id_index_0,id_index_1][2]
+                # print(self.class_list[semantic_label_concat[id_index_0,id_index_1,0]],':',id,' '.join(map(str, panoptic_label_rgb[id_index_0,id_index_1])))
+            if id not in frame_obj_id:
+                print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
+                frame_obj_id.append(id)
+            else:
+                pass
 
     def create_folder(self):
         for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
