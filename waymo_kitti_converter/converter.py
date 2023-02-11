@@ -278,8 +278,8 @@ class WaymoToKITTI(object):
         identity_3x4 = np.eye(4)[:3, :]
 
         # although waymo has 5 cameras, for compatibility, we produces 4 P
-        for i in range():
-        # for i in range(4):
+        # for i in range():
+        for i in range(4):
             if i == 2:
                 # note: front camera is labeled camera 2 (kitti) or camera 0 (waymo)
                 #   other Px are given dummy values. this is to ensure compatibility. They are seldom used anyway.
