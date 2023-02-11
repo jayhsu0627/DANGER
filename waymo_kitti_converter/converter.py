@@ -647,8 +647,7 @@ class WaymoToKITTI(object):
             print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt')
             with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
                         # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
-
-                if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
+                if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
                     print('Category(:id) r g b',file=f)
                 for class_indice in frame_semantic_class:
                     class_name = self.class_list[class_indice]
