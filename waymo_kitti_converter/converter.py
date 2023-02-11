@@ -147,7 +147,7 @@ class WaymoToKITTI(object):
         # file name without extension
         segment_name = os.path.splitext(file_name)[0]
         print(segment_name)
-
+        print(file_idx)
         # Avoid repeat object id in the output text file
         frame_obj_id = []
         # Avoid repeat segmentation class in the output text file
@@ -640,8 +640,8 @@ class WaymoToKITTI(object):
             # frame_semantic_class = list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:]
             frame_semantic_class = [_ for _ in range(29) if (_!= query_class_1) and (_!= query_class_2)]
 
-            print(frame_obj_id)
-            print(segment_class)
+            # print(frame_obj_id)
+            # print(segment_class)
         
             # with open(cur_det_file, 'a') as f:
             print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt')
