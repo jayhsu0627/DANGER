@@ -592,83 +592,83 @@ class WaymoToKITTI(object):
                 semantic_label_rgb = camera_segmentation_utils.semantic_label_to_rgb(
                     semantic_label_concat)
 
-        # plt.figure(figsize=(16, 15))
-        # plt.imshow(tf.image.decode_jpeg(frame.images[0].image))
+            # plt.figure(figsize=(16, 15))
+            # plt.imshow(tf.image.decode_jpeg(frame.images[0].image))
 
-        query_id = 1
+            query_id = 1
 
-        # Car 2; Pedestrain 9
-        query_class_1 = 2
-        query_class_2 = 2
+            # Car 2; Pedestrain 9
+            query_class_1 = 2
+            query_class_2 = 2
 
-        # Find segmentation for instance ID
-        mask_id = instance_label_concat.copy()
-        mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
-        # print(mask_id.shape)
-        mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
-        mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
+            # Find segmentation for instance ID
+            mask_id = instance_label_concat.copy()
+            mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+            # print(mask_id.shape)
+            mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+            mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
 
-        # Find class
-        mask_class = semantic_label_concat.copy()
-        mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
-        # print(mask_class.shape)
-        mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
-        mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
+            # Find class
+            mask_class = semantic_label_concat.copy()
+            mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
+            # print(mask_class.shape)
+            mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
+            mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
 
-        # new_panoptic_label_rgb = panoptic_label_rgb
-        new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
-        # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
+            # new_panoptic_label_rgb = panoptic_label_rgb
+            new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
+            # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
 
-        pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
-        # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
-        # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        plt.imsave(pvp_path, panoptic_label_rgb, format='png')
+            pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
+            # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
+            # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            plt.imsave(pvp_path, panoptic_label_rgb, format='png')
 
-        # plt.grid(False)
-        # plt.axis('off')
-        # plt.show()
+            # plt.grid(False)
+            # plt.axis('off')
+            # plt.show()
 
-        # print('semantic_label: ',list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:])
+            # print('semantic_label: ',list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:])
+            
+            ## All objects!
+            # frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+            # Only car objects!
+            frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+            # print('instance_label: ',frame_instance_id)
+
+            # frame_semantic_class = list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:]
+            frame_semantic_class = [_ for _ in range(29) if (_!= query_class_1) and (_!= query_class_2)]
+
+            print(frame_obj_id)
+            print(segment_class)
         
-        ## All objects!
-        # frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
-        # Only car objects!
-        frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
-        # print('instance_label: ',frame_instance_id)
+            # with open(cur_det_file, 'a') as f:
+            with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
+                        # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
 
-        # frame_semantic_class = list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:]
-        frame_semantic_class = [_ for _ in range(29) if (_!= query_class_1) and (_!= query_class_2)]
-
-        print(frame_obj_id)
-        print(segment_class)
-    
-        # with open(cur_det_file, 'a') as f:
-        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
-                    # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
-
-            if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
-                print('Category(:id) r g b',file=f)
-            for class_indice in frame_semantic_class:
-                class_name = self.class_list[class_indice]
-                r = self.class_color_list[class_indice][0]
-                g = self.class_color_list[class_indice][1]
-                b = self.class_color_list[class_indice][2]
-                if (class_indice not in segment_class) and (class_indice!= query_class_1) and (class_indice!= query_class_2):
-                    print('%s %d %d %d'% (class_name, r, g, b), file=f)
-                segment_class.append(class_indice)
-            for id in frame_instance_id:
-                id_index_0 = np.where(instance_label_concat == id)[0][0]
-                id_index_1 = np.where(instance_label_concat == id)[1][0]
-                class_name = self.class_list[semantic_label_concat[id_index_0,id_index_1,0]]
-                r = panoptic_label_rgb[id_index_0,id_index_1][0]
-                g = panoptic_label_rgb[id_index_0,id_index_1][1]
-                b = panoptic_label_rgb[id_index_0,id_index_1][2]
-                # print(self.class_list[semantic_label_concat[id_index_0,id_index_1,0]],':',id,' '.join(map(str, panoptic_label_rgb[id_index_0,id_index_1])))
-            if id not in frame_obj_id:
-                print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
-                frame_obj_id.append(id)
-            else:
-                pass
+                if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
+                    print('Category(:id) r g b',file=f)
+                for class_indice in frame_semantic_class:
+                    class_name = self.class_list[class_indice]
+                    r = self.class_color_list[class_indice][0]
+                    g = self.class_color_list[class_indice][1]
+                    b = self.class_color_list[class_indice][2]
+                    if (class_indice not in segment_class) and (class_indice!= query_class_1) and (class_indice!= query_class_2):
+                        print('%s %d %d %d'% (class_name, r, g, b), file=f)
+                    segment_class.append(class_indice)
+                for id in frame_instance_id:
+                    id_index_0 = np.where(instance_label_concat == id)[0][0]
+                    id_index_1 = np.where(instance_label_concat == id)[1][0]
+                    class_name = self.class_list[semantic_label_concat[id_index_0,id_index_1,0]]
+                    r = panoptic_label_rgb[id_index_0,id_index_1][0]
+                    g = panoptic_label_rgb[id_index_0,id_index_1][1]
+                    b = panoptic_label_rgb[id_index_0,id_index_1][2]
+                    # print(self.class_list[semantic_label_concat[id_index_0,id_index_1,0]],':',id,' '.join(map(str, panoptic_label_rgb[id_index_0,id_index_1])))
+                if id not in frame_obj_id:
+                    print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
+                    frame_obj_id.append(id)
+                else:
+                    pass
 
     def create_folder(self):
         # for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
