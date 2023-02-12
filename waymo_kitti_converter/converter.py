@@ -665,11 +665,11 @@ class WaymoToKITTI(object):
                     g = panoptic_label_rgb[id_index_0,id_index_1][1]
                     b = panoptic_label_rgb[id_index_0,id_index_1][2]
                     # print(self.class_list[semantic_label_concat[id_index_0,id_index_1,0]],':',id,' '.join(map(str, panoptic_label_rgb[id_index_0,id_index_1])))
-                if id not in frame_obj_id:
-                    print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
-                    frame_obj_id.append(id)
-                else:
-                    pass
+                    if id not in frame_obj_id:
+                        print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
+                        frame_obj_id.append(id)
+                    else:
+                        pass
 
     def create_folder(self):
         # for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
