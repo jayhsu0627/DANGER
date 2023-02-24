@@ -182,6 +182,19 @@ class WaymoToKITTI(object):
 
             # parse 2D Panoramic Video Panoptic Segmentation files
             self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
+        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'r+') as f:
+            lines = f.readlines()
+        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'w+') as f:
+            header = lines[:29]
+            objects = lines[29:]
+            temp_dict = { obj : int(obj.split(":")[1].split(" ")[0]) for obj in objects }
+            sortedDict = sorted(my_dict.items(), key=lambda x:x[1])
+            sortedDict = [item[0] for item in sortedDict]
+            header.extend(sortedDict)
+            for string in header:
+            print(string[:-1], file=f)
+            f.close()
+        print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + ' '+" Created Successfully")
 
     def __len__(self):
         return len(self.tfrecord_pathnames)
@@ -592,21 +605,47 @@ class WaymoToKITTI(object):
                 semantic_label_rgb = camera_segmentation_utils.semantic_label_to_rgb(
                     semantic_label_concat)
 
+                sequence_id = frame.images[0].camera_segmentation_label.sequence_id
+                remapped_instance_ids = camera_segmentation_utils._remap_global_ids([frame.images[0].camera_segmentation_label])
+                
+                # Switch key and value, from global_id:instance_id to instance_id:global_id
+                # Here the global_id is the unique tracking_id in virtual KITTI !!
+
+                remapped_instance_ids_switch = {value: key for key, value in remapped_instance_ids[sequence_id].items()}
+                global_id_label_concat = np.vectorize(remapped_instance_ids_switch.get)(instance_label_concat)
+                global_id_label_concat = np.nan_to_num(np.array(global_id_label_concat,dtype=float)).astype(int) # Convert None into nan by float, then convert nan to 0 by int
+                # convert ndarray global_id_label_concat into, instance_labels-like, list mode
+                global_id_labels = global_id_label_concat.tolist()
+                global_label_rgb = camera_segmentation_utils.panoptic_label_to_rgb(
+                    semantic_label_concat, global_id_label_concat)
+
+
             # plt.figure(figsize=(16, 15))
             # plt.imshow(tf.image.decode_jpeg(frame.images[0].image))
 
-            query_id = 1
+            query_id_1 = 9
+            query_id_2 = 10
+            query_id_3 = 21
+            query_id_4 = 22
 
             # Car 2; Pedestrain 9
             query_class_1 = 2
             query_class_2 = 2
 
-            # Find segmentation for instance ID
-            mask_id = instance_label_concat.copy()
+
+            # # Find segmentation for instance ID
+            # mask_id = instance_label_concat.copy()
+            # mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+            # # print(mask_id.shape)
+            # mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+            # mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
+
+            # Find segmentation for global ID
+            mask_id = global_id_label_concat.copy()
             mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
             # print(mask_id.shape)
             mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
-            mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
+            mask_id_3d_mod = np.where((mask_id_3d==query_id_1) | (mask_id_3d==query_id_2)| (mask_id_3d==query_id_3)| (mask_id_3d==query_id_4), 1, 0)
 
             # Find class
             mask_class = semantic_label_concat.copy()
@@ -616,14 +655,16 @@ class WaymoToKITTI(object):
             mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
 
             # new_panoptic_label_rgb = panoptic_label_rgb
-            new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
+            new_panoptic_label_rgb = global_label_rgb * mask_id_3d_mod * mask_class_3d_mod
+            # new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
             # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
 
             pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
             print(pvp_path)
             # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            plt.imsave(pvp_path, panoptic_label_rgb, format='png')
+            # plt.imsave(pvp_path, panoptic_label_rgb, format='png')
+            plt.imsave(pvp_path, global_label_rgb, format='png')
 
             # plt.grid(False)
             # plt.axis('off')
@@ -657,13 +698,13 @@ class WaymoToKITTI(object):
                     if (class_indice not in segment_class) and (class_indice!= query_class_1) and (class_indice!= query_class_2):
                         print('%s %d %d %d'% (class_name, r, g, b), file=f)
                     segment_class.append(class_indice)
-                for id in frame_instance_id:
-                    id_index_0 = np.where(instance_label_concat == id)[0][0]
-                    id_index_1 = np.where(instance_label_concat == id)[1][0]
+                for id in frame_global_id:
+                    id_index_0 = np.where(global_id_label_concat == id)[0][0]
+                    id_index_1 = np.where(global_id_label_concat == id)[1][0]
                     class_name = self.class_list[semantic_label_concat[id_index_0,id_index_1,0]]
-                    r = panoptic_label_rgb[id_index_0,id_index_1][0]
-                    g = panoptic_label_rgb[id_index_0,id_index_1][1]
-                    b = panoptic_label_rgb[id_index_0,id_index_1][2]
+                    r = global_label_rgb[id_index_0,id_index_1][0]
+                    g = global_label_rgb[id_index_0,id_index_1][1]
+                    b = global_label_rgb[id_index_0,id_index_1][2]
                     # print(self.class_list[semantic_label_concat[id_index_0,id_index_1,0]],':',id,' '.join(map(str, panoptic_label_rgb[id_index_0,id_index_1])))
                     if id not in frame_obj_id:
                         print('%s:%d %d %d %d'% (class_name, id, r, g, b), file=f)
