@@ -675,8 +675,9 @@ class WaymoToKITTI(object):
             ## All objects!
             # frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
             # Only car objects!
-            frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+            # frame_instance_id = list(set(sorted((instance_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
             # print('instance_label: ',frame_instance_id)
+            frame_global_id = list(set(sorted((global_id_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
 
             # frame_semantic_class = list(set(sorted(semantic_label_concat.reshape(-1).tolist())))[1:]
             frame_semantic_class = [_ for _ in range(29) if (_!= query_class_1) and (_!= query_class_2)]
