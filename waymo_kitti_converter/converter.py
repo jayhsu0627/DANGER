@@ -192,7 +192,7 @@ class WaymoToKITTI(object):
             sortedDict = [item[0] for item in sortedDict]
             header.extend(sortedDict)
             for string in header:
-            print(string[:-1], file=f)
+                print(string[:-1], file=f)
             f.close()
         print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + ' '+" Created Successfully")
 
