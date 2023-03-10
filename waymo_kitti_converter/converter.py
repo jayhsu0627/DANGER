@@ -491,8 +491,148 @@ class WaymoToKITTI(object):
             # contribution is welcome
             alpha = -10
 
+
+
+            # build frame_global_id
+
+            frames_with_seg = []
+            sequence_id = None
+
+            # Save frames which contain CameraSegmentationLabel messages. We assume that
+            # if the first image has segmentation labels, all images in this frame will.
+            if frame.images[0].camera_segmentation_label.panoptic_label:
+                # print(frame.images[0].camera_segmentation_label)
+                frames_with_seg.append(frame)
+
+
+            # if sequence_id is None:
+            #   sequence_id = frame.images[0].camera_segmentation_label.sequence_id
+            # # Collect 3/5 frames for this demo. However, any number can be used in practice.
+            # if frame.images[0].camera_segmentation_label.sequence_id != sequence_id or len(frames_with_seg) > 4:
+            #   break
+
+
+            camera_front_only = [open_dataset.CameraName.FRONT]
+
+            segmentation_protos_ordered = []
+            for frame in frames_with_seg:
+                segmentation_proto_dict = {image.name : image.camera_segmentation_label for image in frame.images}
+                segmentation_protos_ordered.append([segmentation_proto_dict[name] for name in camera_front_only])
+
+                # The dataset provides tracking for instances between cameras and over time.
+                # By setting remap_values=True, this function will remap the instance IDs in
+                # each image so that instances for the same object will have the same ID between
+                # different cameras and over time.
+                segmentation_protos_flat = sum(segmentation_protos_ordered, [])
+                panoptic_labels, is_tracked_masks, panoptic_label_divisor = camera_segmentation_utils.decode_multi_frame_panoptic_labels_from_protos(
+                    segmentation_protos_flat, remap_values=True
+                )
+                # print('panoptic_labels:',len(panoptic_labels),'at frame', frame_idx+1)
+
+                # We can further separate the semantic and instance labels from the panoptic
+                # labels.
+                NUM_CAMERA_FRAMES = 1
+                semantic_labels_multiframe = []
+                instance_labels_multiframe = []
+                semantic_labels = []
+                instance_labels = []
+                
+                for i in range(0, len(segmentation_protos_flat), NUM_CAMERA_FRAMES):
+                    semantic_labels = []
+                    instance_labels = []
+                    for j in range(NUM_CAMERA_FRAMES):
+                        semantic_label, instance_label = camera_segmentation_utils.decode_semantic_and_instance_labels_from_panoptic_label(
+                            panoptic_labels[i + j], panoptic_label_divisor)
+                        semantic_labels.append(semantic_label)
+                        instance_labels.append(instance_label)
+                        semantic_labels_multiframe.append(semantic_labels)
+                        instance_labels_multiframe.append(instance_labels)
+
+                        # Pad labels to a common size so that they can be concatenated.
+                        instance_labels = [[self._pad_to_common_shape(label) for label in instance_labels] for instance_labels in instance_labels_multiframe]
+                        semantic_labels = [[self._pad_to_common_shape(label) for label in semantic_labels] for semantic_labels in semantic_labels_multiframe]
+                        instance_labels = [np.concatenate(label, axis=1) for label in instance_labels]
+                        semantic_labels = [np.concatenate(label, axis=1) for label in semantic_labels]
+                        print(len(instance_labels[0]))
+
+                        instance_label_concat = np.concatenate(instance_labels, axis=0)
+                        semantic_label_concat = np.concatenate(semantic_labels, axis=0)
+                        panoptic_label_rgb = camera_segmentation_utils.panoptic_label_to_rgb(
+                            semantic_label_concat, instance_label_concat)
+                        semantic_label_rgb = camera_segmentation_utils.semantic_label_to_rgb(
+                            semantic_label_concat)
+
+                        sequence_id = frame.images[0].camera_segmentation_label.sequence_id
+                        remapped_instance_ids = camera_segmentation_utils._remap_global_ids([frame.images[0].camera_segmentation_label])
+                        
+                        # Switch key and value, from global_id:instance_id to instance_id:global_id
+                        # Here the global_id is the unique tracking_id in virtual KITTI !!
+
+                        remapped_instance_ids_switch = {value: key for key, value in remapped_instance_ids[sequence_id].items()}
+                        global_id_label_concat = np.vectorize(remapped_instance_ids_switch.get)(instance_label_concat)
+                        global_id_label_concat = np.nan_to_num(np.array(global_id_label_concat,dtype=float)).astype(int) # Convert None into nan by float, then convert nan to 0 by int
+                        # convert ndarray global_id_label_concat into, instance_labels-like, list mode
+                        global_id_labels = global_id_label_concat.tolist()
+                        global_label_rgb = camera_segmentation_utils.panoptic_label_to_rgb(
+                            semantic_label_concat, global_id_label_concat)
+
+
+            # REBUILDING global_id_label_concat
+
+            remapped_instance_ids = camera_segmentation_utils._remap_global_ids([frame.images[0].camera_segmentation_label])
+            sequence_id = frame.images[0].camera_segmentation_label.sequence_id
+            remapped_instance_ids_switch = {value: key for key, value in remapped_instance_ids[sequence_id].items()}
+            instance_label_concat = np.concatenate(instance_labels, axis=0)
+            global_id_label_concat = np.vectorize(remapped_instance_ids_switch.get)(instance_label_concat)
+
+            # REBUILDING mask_class_3d_mod
+            query_id_1 = 9
+            query_id_2 = 10
+            query_id_3 = 21
+            query_id_4 = 22
+
+            # Car 2; Pedestrain 9
+            query_class_1 = 2
+            query_class_2 = 2
+
+            # # Find segmentation for instance ID
+            # mask_id = instance_label_concat.copy()
+            # mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+            # print(mask_id.shape)
+            # mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+            # mask_id_3d_mod = np.where(mask_id_3d==query_id, 1, 0)
+
+            # # Find segmentation for panoptic ID
+            # mask_id = panoptic_labels[0].copy()
+            # mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+            # print(mask_id.shape)
+            # mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+            # mask_id_3d_mod = np.where((mask_id_3d==query_id_1) | (mask_id_3d==query_id_2)| (mask_id_3d==query_id_3)| (mask_id_3d==query_id_4), 1, 0)
+
+            # Find segmentation for global ID
+
+            # print('instance_label_concat:',instance_label_concat.shape)
+            # print('global_id_label_concat',global_id_label_concat.shape)
+            mask_id = global_id_label_concat.copy()
+            mask_id = mask_id.reshape(mask_id.shape[0],mask_id.shape[1])
+            # print(mask_id.shape)
+            mask_id_3d = np.stack((mask_id,mask_id,mask_id),axis=2) #3 channel mask
+            mask_id_3d_mod = np.where((mask_id_3d==query_id_1) | (mask_id_3d==query_id_2)| (mask_id_3d==query_id_3)| (mask_id_3d==query_id_4), 1, 0)
+
+            # Find class
+            mask_class = semantic_label_concat.copy()
+            mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
+            # print(mask_class.shape)
+            mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
+            mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
+
+            
+
+            frame_global_id = list(set(sorted((global_id_label_concat*mask_class_3d_mod).reshape(-1).tolist())))[1:]
+
             # save the labels
-            line = my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+            line = my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+                                                                                   round(frame_global_id, 2),
                                                                                    occluded,
                                                                                    round(alpha, 2),
                                                                                    round(bounding_box[0], 2),
