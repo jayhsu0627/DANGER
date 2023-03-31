@@ -530,9 +530,16 @@ class WaymoToKITTI(object):
         KITTI raw dataset contains ego motion files but are not often used
         Pose is important for algorithms that takes advantage of the temporal information
 
+        equivilent to extrinsicsgt of vkitti, where aach line consists of the frame index in the video (starts from 0) followed by the row-wise flattened 4×4 extrinsic matrix at that frame:
+            r1,1 r1,2 r1,3 t1
+        M = r2,1 r2,2 r2,3 t2
+            r3,1 r3,2 r3,3 t3
+           0     0     0    1
         """
 
-        pose = np.array(frame.pose.transform).reshape(4,4)
+        # pose = np.array(frame.pose.transform).reshape(4,4)
+        # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
+        pose = np.array(frame.pose.transform)
         np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
 
     def save_2D_semantic(self, frame, file_idx, frame_idx, frame_obj_id, segment_class):
