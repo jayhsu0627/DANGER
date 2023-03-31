@@ -419,6 +419,8 @@ class WaymoToKITTI(object):
             if bounding_box == None or name == None:
                 name = '0'
                 bounding_box = (0, 0, 0, 0)
+            
+            if name != '0': continue  # output first camera only; Ignore other cameras
 
             my_type = self.type_list[obj.type]
 
@@ -518,8 +520,7 @@ class WaymoToKITTI(object):
             fp_label.close()
 
             fp_label_all.write(line_all)
-            
-            break # output first camera only
+
         fp_label_all.close()
 
     def save_pose(self, frame, file_idx, frame_idx):
