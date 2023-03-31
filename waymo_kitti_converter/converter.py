@@ -518,7 +518,8 @@ class WaymoToKITTI(object):
             fp_label.close()
 
             fp_label_all.write(line_all)
-
+            
+            break # output first camera only
         fp_label_all.close()
 
     def save_pose(self, frame, file_idx, frame_idx):
