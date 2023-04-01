@@ -520,7 +520,8 @@ class WaymoToKITTI(object):
                 line_all = line[:-1] + ' ' + name + '\n'
 
             # store the label
-            fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
+            # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
+            fp_label = open(self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
             fp_label.write(line)
             fp_label.close()
 
