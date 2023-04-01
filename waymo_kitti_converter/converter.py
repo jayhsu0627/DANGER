@@ -124,8 +124,9 @@ class WaymoToKITTI(object):
         self.image_save_dir       = self.save_dir + '/image_'
         self.calib_save_dir       = self.save_dir + '/calib'
         self.point_cloud_save_dir = self.save_dir + '/velodyne'
-        self.pose_save_dir        = self.save_dir + '/pose'
-        self.pvp_save_dir         = self.save_dir + '/scenegt'
+        # self.pose_save_dir        = self.save_dir + '/pose'
+        self.pose_save_dir        = self.save_dir + '/vkitti_1.3.1_extrinsicsgt'        
+        self.pvp_save_dir         = self.save_dir + '/vkitti_1.3.1_scenegt'
         self.create_folder()
 
     def convert(self):
@@ -541,7 +542,7 @@ class WaymoToKITTI(object):
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         pose = np.array(frame.pose.transform).reshape(1,16)
         pose = np.insert(pose, 0, frame_idx, axis=1)
-        file_name = join(self.pose_save_dir, self.prefix + 'clone'+ '.txt')
+        file_name = join(self.pose_save_dir, self.prefix + str(file_idx).zfill(4) +'clone'+ '.txt')
 
         if not isfile(file_name):
             with open(file_name, 'a') as f:
@@ -602,7 +603,11 @@ class WaymoToKITTI(object):
             instance_labels_multiframe = []
             semantic_labels = []
             instance_labels = []
-            
+
+            pvp_folder_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4)
+            if not isdir(pvp_folder_path):
+                os.makedirs(pvp_folder_path)
+
             for i in range(0, len(segmentation_protos_flat), NUM_CAMERA_FRAMES):
                 semantic_labels = []
                 instance_labels = []
@@ -680,7 +685,8 @@ class WaymoToKITTI(object):
             # new_panoptic_label_rgb = panoptic_label_rgb * mask_id_3d_mod * mask_class_3d_mod
             # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
 
-            pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
+            # pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
+            pvp_path = pvp_folder_path + '/clone/' + str(frame_idx).zfill(5) + '.png'
             print(pvp_path)
             # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
