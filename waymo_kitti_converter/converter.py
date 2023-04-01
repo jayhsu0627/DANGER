@@ -542,7 +542,7 @@ class WaymoToKITTI(object):
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         pose = np.array(frame.pose.transform).reshape(1,16)
         pose = np.insert(pose, 0, frame_idx, axis=1)
-        file_name = join(self.pose_save_dir, self.prefix + str(file_idx).zfill(4) +'clone'+ '.txt')
+        file_name = join(self.pose_save_dir, self.prefix + str(file_idx).zfill(4) +'_clone'+ '.txt')
 
         if not isfile(file_name):
             with open(file_name, 'a') as f:
@@ -604,7 +604,8 @@ class WaymoToKITTI(object):
             semantic_labels = []
             instance_labels = []
 
-            pvp_folder_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4)
+            pvp_folder_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '/clone/'
+
             if not isdir(pvp_folder_path):
                 os.makedirs(pvp_folder_path)
 
@@ -686,7 +687,7 @@ class WaymoToKITTI(object):
             # plt.imshow(new_panoptic_label_rgb, alpha=0.3)
 
             # pvp_path = self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
-            pvp_path = pvp_folder_path + '/clone/' + str(frame_idx).zfill(5) + '.png'
+            pvp_path = pvp_folder_path + str(frame_idx).zfill(5) + '.png'
             print(pvp_path)
             # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
