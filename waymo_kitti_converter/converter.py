@@ -121,7 +121,8 @@ class WaymoToKITTI(object):
 
         self.label_save_dir       = self.save_dir + '/label_'
         self.label_all_save_dir   = self.save_dir + '/label_all'
-        self.image_save_dir       = self.save_dir + '/image_'
+        # self.image_save_dir       = self.save_dir + '/image_'
+        self.image_save_dir       = self.save_dir + '/vkitti_1.3.1_rgb'
         self.calib_save_dir       = self.save_dir + '/calib'
         self.point_cloud_save_dir = self.save_dir + '/velodyne'
         # self.pose_save_dir        = self.save_dir + '/pose'
@@ -183,9 +184,10 @@ class WaymoToKITTI(object):
 
             # parse 2D Panoramic Video Panoptic Segmentation files
             self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
-        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'r+') as f:
+
+        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt', 'r+') as f:
             lines = f.readlines()
-        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'w+') as f:
+        with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt', 'w+') as f:
             header = lines[:29]
             objects = lines[29:]
             temp_dict = { obj : int(obj.split(":")[1].split(" ")[0]) for obj in objects }
@@ -195,7 +197,7 @@ class WaymoToKITTI(object):
             for string in header:
                 print(string[:-1], file=f)
             f.close()
-        print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + ' '+" Created Successfully")
+        print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + ' '+" Created Successfully")
 
     def __len__(self):
         return len(self.tfrecord_pathnames)
@@ -209,7 +211,9 @@ class WaymoToKITTI(object):
         """
         for img in frame.images:
             # frame.images[0] represent the front camera
+            # img_path = self.image_save_dir + str(img.name - 1) + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
             img_path = self.image_save_dir + str(img.name - 1) + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.png'
+
             img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             plt.imsave(img_path, rgb_img, format='png')
@@ -714,10 +718,10 @@ class WaymoToKITTI(object):
             # print(segment_class)
         
             # with open(cur_det_file, 'a') as f:
-            print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt')
-            with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
+            print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt')
+            with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt', 'a') as f:
                         # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
-                if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
+                if os.path.getsize(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt') == 0:
                     print('Category(:id) r g b',file=f)
                 for class_indice in frame_semantic_class:
                     class_name = self.class_list[class_indice]
@@ -749,8 +753,9 @@ class WaymoToKITTI(object):
         for d in [self.label_save_dir, self.image_save_dir]:
             # for i in range(5):
             for i in range(1):
-                if not isdir(d + str(i)):
-                    os.makedirs(d + str(i))
+                if not isdir(d):
+                    # os.makedirs(d + str(i))
+                    os.makedirs(d)
 
     def convert_range_image_to_point_cloud(self,
                                            frame,
