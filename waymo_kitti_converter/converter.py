@@ -119,7 +119,8 @@ class WaymoToKITTI(object):
 
         self.tfrecord_pathnames = sorted(glob(join(self.load_dir, '*.tfrecord')))
 
-        self.label_save_dir       = self.save_dir + '/label_'
+        # self.label_save_dir       = self.save_dir + '/label_'
+        self.label_save_dir       = self.save_dir + '/vkitti_1.3.1_motgt'
         self.label_all_save_dir   = self.save_dir + '/label_all'
         # self.image_save_dir       = self.save_dir + '/image_'
         self.image_save_dir       = self.save_dir + '/vkitti_1.3.1_rgb'
@@ -525,7 +526,7 @@ class WaymoToKITTI(object):
             fp_label.write(line)
             fp_label.close()
 
-            fp_label_all.write(line_all)
+            # fp_label_all.write(line_all)
 
         fp_label_all.close()
 
@@ -748,7 +749,7 @@ class WaymoToKITTI(object):
 
     def create_folder(self):
         # for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
-        for d in [self.label_all_save_dir, self.calib_save_dir, self.pose_save_dir, self.pvp_save_dir]:
+        for d in [self.calib_save_dir, self.pose_save_dir, self.pvp_save_dir]:
             if not isdir(d):
                 os.makedirs(d)
         for d in [self.label_save_dir, self.image_save_dir]:
