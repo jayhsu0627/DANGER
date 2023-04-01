@@ -7,7 +7,7 @@ import tensorflow.compat.v1 as tf
 
 import tqdm
 from multiprocessing import Pool
-from os.path import join, isdir
+from os.path import join, isdir, isfile
 import argparse
 from glob import glob
 
@@ -543,7 +543,7 @@ class WaymoToKITTI(object):
         pose = np.insert(pose, 0, frame_idx, axis=1)
         file_name = join(self.pose_save_dir, self.prefix + 'clone'+ '.txt')
 
-        if not isdir(file_name):
+        if not isfile(file_name):
             with open(file_name, 'a') as f:
                 f.write('frame r1,1 r1,2 r1,3 t1 r2,1 r2,2 r2,3 t2 r3,1 r3,2 r3,3 t3 0 0.1 0.2 1\n')
                 f.close()
