@@ -408,6 +408,14 @@ class WaymoToKITTI(object):
                 id_to_bbox[label.id] = bbox
                 id_to_name[label.id] = name - 1
 
+        # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
+        file_name = self.label_save_dir + '/' + self.prefix + 'clone' + '.txt'
+
+        if not isfile(file_name):
+            with open(file_name, 'a') as f:
+                f.write('frame tid label truncated occluded alpha l t r b w3d h3d l3d x3d y3d z3d ry rx rz truncr occupr orig_label moving model color\n')
+                f.close()
+
         # print([i.type for i in frame.laser_labels])
         for obj in frame.laser_labels:
 
@@ -501,20 +509,20 @@ class WaymoToKITTI(object):
             alpha = -10
 
             # save the labels
-            line = my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
-                                                                                   occluded,
-                                                                                   round(alpha, 2),
-                                                                                   round(bounding_box[0], 2),
-                                                                                   round(bounding_box[1], 2),
-                                                                                   round(bounding_box[2], 2),
-                                                                                   round(bounding_box[3], 2),
-                                                                                   round(height, 2),
-                                                                                   round(width, 2),
-                                                                                   round(length, 2),
-                                                                                   round(x, 2),
-                                                                                   round(y, 2),
-                                                                                   round(z, 2),
-                                                                                   round(rotation_y, 2))
+            line = frame_idx + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+                                                                                                occluded,
+                                                                                                round(alpha, 2),
+                                                                                                round(bounding_box[0], 2),
+                                                                                                round(bounding_box[1], 2),
+                                                                                                round(bounding_box[2], 2),
+                                                                                                round(bounding_box[3], 2),
+                                                                                                round(height, 2),
+                                                                                                round(width, 2),
+                                                                                                round(length, 2),
+                                                                                                round(x, 2),
+                                                                                                round(y, 2),
+                                                                                                round(z, 2),
+                                                                                                round(rotation_y, 2))
             if save_track_id:
                 line_all = line[:-1] + ' ' + name + ' ' + track_id + '\n'
             else:
@@ -522,7 +530,7 @@ class WaymoToKITTI(object):
 
             # store the label
             # fp_label = open(self.label_save_dir + name + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
-            fp_label = open(self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'a')
+            fp_label = open(file_name, 'a')
             fp_label.write(line)
             fp_label.close()
 
