@@ -540,7 +540,10 @@ class WaymoToKITTI(object):
         # pose = np.array(frame.pose.transform).reshape(4,4)
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         pose = np.array(frame.pose.transform).reshape(1,16)
+        np.insert(pose,0,frame_idx)
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
+        if not join(self.pose_save_dir, self.prefix + 'clone'+ '.txt'):
+            np.savetxt("frame r1,1 r1,2 r1,3 t1 r2,1 r2,2 r2,3 t2 r3,1 r3,2 r3,3 t3 0 0.1 0.2 1")
         np.savetxt(join(self.pose_save_dir, self.prefix + 'clone'+ '.txt'), pose)
 
     def save_2D_semantic(self, frame, file_idx, frame_idx, frame_obj_id, segment_class):
