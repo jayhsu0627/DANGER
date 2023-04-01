@@ -394,7 +394,7 @@ class WaymoToKITTI(object):
                 :param frame_idx: the current frame number
                 :return:
                 """
-        fp_label_all = open(self.label_all_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'w+')
+        # fp_label_all = open(self.label_all_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'w+')
         # preprocess bounding box data
         id_to_bbox = dict()
         id_to_name = dict()
@@ -528,7 +528,7 @@ class WaymoToKITTI(object):
 
             # fp_label_all.write(line_all)
 
-        fp_label_all.close()
+        # fp_label_all.close()
 
     def save_pose(self, frame, file_idx, frame_idx):
         """ Save self driving car (SDC)'s own pose
