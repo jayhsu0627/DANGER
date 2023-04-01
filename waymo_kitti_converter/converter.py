@@ -544,7 +544,7 @@ class WaymoToKITTI(object):
         file_name = join(self.pose_save_dir, self.prefix + 'clone'+ '.txt')
 
         if not isdir(file_name):
-            with open(file_name, 'aw') as f:
+            with open(file_name, 'a') as f:
                 f.write('frame r1,1 r1,2 r1,3 t1 r2,1 r2,2 r2,3 t2 r3,1 r3,2 r3,3 t3 0 0.1 0.2 1\n')
                 f.close()
 
