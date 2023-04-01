@@ -540,7 +540,7 @@ class WaymoToKITTI(object):
         # pose = np.array(frame.pose.transform).reshape(4,4)
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         pose = np.array(frame.pose.transform).reshape(1,16)
-        pose = np.insert(pose, 0, frame_idx)
+        pose = np.insert(pose, 0, frame_idx, axis=1)
         file_name = join(self.pose_save_dir, self.prefix + 'clone'+ '.txt')
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         if not isdir(file_name):
