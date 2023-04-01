@@ -544,7 +544,7 @@ class WaymoToKITTI(object):
         file_name = join(self.pose_save_dir, self.prefix + 'clone'+ '.txt')
         # np.savetxt(join(self.pose_save_dir, self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'), pose)
         if not file_name:
-            np.savetxt("frame r1,1 r1,2 r1,3 t1 r2,1 r2,2 r2,3 t2 r3,1 r3,2 r3,3 t3 0 0.1 0.2 1 \n")
+            np.savetxt(file_name,"frame r1,1 r1,2 r1,3 t1 r2,1 r2,2 r2,3 t2 r3,1 r3,2 r3,3 t3 0 0.1 0.2 1", newline='\n')
         with open(file_name, "ab") as f:
             # f.write(b"\n")
             np.savetxt(f, pose, newline='\n')
