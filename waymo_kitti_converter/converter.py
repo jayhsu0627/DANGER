@@ -192,7 +192,7 @@ class WaymoToKITTI(object):
             header = lines[:29]
             objects = lines[29:]
             temp_dict = { obj : int(obj.split(":")[1].split(" ")[0]) for obj in objects }
-            sortedDict = sorted(my_dict.items(), key=lambda x:x[1])
+            sortedDict = sorted(temp_dict.items(), key=lambda x:x[1])
             sortedDict = [item[0] for item in sortedDict]
             header.extend(sortedDict)
             for string in header:
@@ -409,7 +409,7 @@ class WaymoToKITTI(object):
                 id_to_name[label.id] = name - 1
 
         # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
-        file_name = self.label_save_dir + '/' + self.prefix + 'clone' + '.txt'
+        file_name = self.label_save_dir + '/' + str(file_idx).zfill(4) + self.prefix + '_clone' + '.txt'
 
         if not isfile(file_name):
             with open(file_name, 'a') as f:
