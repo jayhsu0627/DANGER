@@ -566,9 +566,9 @@ class WaymoToKITTI(object):
             
             lidar_list, label_id_list, camera_list, lidar_bb, camera_bb = [],[],[],[],[]
             lidar_list, label_id_list, lidar_bb = self.save_projected_lidar_labels(image, frame)
-            print(image.name,': lidar_list:',len(lidar_list))
+            # print(image.name,': lidar_list:',len(lidar_list))
             camera_list, camera_bb = self.save_camera_2d_image(image, frame, frame.camera_labels)
-            print(image.name,': camera_list:',len(camera_list))
+            # print(image.name,': camera_list:',len(camera_list))
             
             if len(lidar_list) and len(camera_list)>0:
                 for i,lidar in enumerate(lidar_list):
@@ -587,7 +587,8 @@ class WaymoToKITTI(object):
 
             break # output the front camera only
         
-        print(id_to_camera_bbox)
+        # print(id_to_camera_bbox)
+
         # preprocess bounding box data
         # id_to_bbox = dict()
         id_to_name = dict()
@@ -600,7 +601,8 @@ class WaymoToKITTI(object):
                 #         label.box.center_x + label.box.length / 2, label.box.center_y + label.box.width / 2]
                 # id_to_bbox[label.id] = bbox
                 id_to_name[label.id] = name - 1
-        print(id_to_name)
+        
+        # print(id_to_name)
 
         # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
         file_name = self.label_save_dir + '/' + str(file_idx).zfill(4) + self.prefix + '_clone' + '.txt'
@@ -653,12 +655,15 @@ class WaymoToKITTI(object):
             # converter
             # 264, 59, 24, 16, 51, 268, 24, 847, 149, 28, 6, 13, 30, 45, \
             # 64, 192, 353, 229, 1848, 2, 48
-            print(global_id_label_concat.shape)
-            print(bounding_box)
-            # tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
-            print(global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)])
+            
+            # print(global_id_label_concat.shape)
+            # print(bounding_box)
+            
+            tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
+            
+            # print(global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)])
 
-            tid = global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)][0]
+            # tid = global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)][0]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
 
