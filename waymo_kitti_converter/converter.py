@@ -67,9 +67,9 @@ filter_no_label_zone_points = True
 selected_waymo_classes = [
     # 'UNKNOWN',
     'VEHICLE',
-    'PEDESTRIAN',
+    # 'PEDESTRIAN',
     # 'SIGN',
-    'CYCLIST'
+    # 'CYCLIST'
 ]
 
 
@@ -177,14 +177,15 @@ class WaymoToKITTI(object):
             # # parse point clouds
             # self.save_lidar(frame, file_idx, frame_idx)
 
+            # parse 2D Panoramic Video Panoptic Segmentation files
+            global_id_label_concat = self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
+
             # parse label files
-            self.save_label(frame, file_idx, frame_idx)
+            self.save_label(frame, file_idx, frame_idx, global_id_label_concat)
 
             # parse pose files
             self.save_pose(frame, file_idx, frame_idx)
 
-            # parse 2D Panoramic Video Panoptic Segmentation files
-            self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
 
         with open(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + '.txt', 'r+') as f:
             lines = f.readlines()
@@ -195,7 +196,7 @@ class WaymoToKITTI(object):
             sortedDict = sorted(temp_dict.items(), key=lambda x:x[1])
             sortedDict = [item[0] for item in sortedDict]
             header.extend(sortedDict)
-            for string in header:
+            for string in header: 
                 print(string[:-1], file=f)
             f.close()
         print(self.pvp_save_dir + '/' + self.prefix + str(file_idx).zfill(4) + '_clone_scenegt_rgb_encoding' + ' '+" Created Successfully")
@@ -387,27 +388,249 @@ class WaymoToKITTI(object):
         pc_path = self.point_cloud_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.bin'
         point_cloud.astype(np.float32).tofile(pc_path)  # note: must save as float32, otherwise loading errors
 
-    def save_label(self, frame, file_idx, frame_idx):
+    # from waymo_open_dataset.utils import keypoint_data
+
+
+    # # Data location - please edit. Should point to a tfrecord containing tf.Example
+    # # protos as downloaded from the Waymo Open Dataset website.
+
+    # # FILENAME = '/content/data/individual_files/training/segment-10017090168044687777_6380_000_6400_000_with_camera_labels.tfrecord'
+    # FILENAME = '/content/data/individual_files/training/segment-1146261869236413282_1680_000_1700_000_with_camera_labels.tfrecord'
+    # # FILENAME = '/content/data/individual_files/training/segment-10526338824408452410_5714_660_5734_660_with_camera_labels.tfrecord'
+    # # FILENAME = '/content/waymo-od/tutorial/frame_with_keypoints.tfrecord'
+
+
+    # # Read a random frame
+
+    # dataset = tf.data.TFRecordDataset(FILENAME, compression_type='')
+    # dataset_iter = dataset.as_numpy_iterator()
+
+    # # Get a specific frame from the segment.
+    # local_frame_count = np.random.randint(1,200)
+    # for i in range(local_frame_count):
+    # data = next(dataset_iter)
+    # frame = open_dataset.Frame()
+    # frame.ParseFromString(data)
+    # print(frame.context.name, frame.timestamp_micros)
+
+    # FILTER_AVAILABLE = any(
+    #     [label.num_top_lidar_points_in_box > 0 for label in frame.laser_labels])
+
+    # if not FILTER_AVAILABLE:
+    # print('WARNING: num_top_lidar_points_in_box does not seem to be populated. '
+    #         'Make sure that you are using an up-to-date release (V1.3.2 or later) '
+    #         'to enable improved filtering of occluded objects.')
+    
+
+    def image_resize(self, image, width = None, height = None, inter = cv2.INTER_AREA):
+        # initialize the dimensions of the image to be resized and
+        # grab the image size
+        dim = None
+        (h, w) = image.shape[:2]
+
+        # if both the width and height are None, then return the
+        # original image
+        if width is None and height is None:
+            return image
+
+        # check to see if the width is None
+        if width is None:
+            # calculate the ratio of the height and construct the
+            # dimensions
+            r = height / float(h)
+            dim = (int(w * r), height)
+
+        # otherwise, the height is None
+        else:
+            # calculate the ratio of the width and construct the
+            # dimensions
+            r = width / float(w)
+            dim = (width, int(h * r))
+
+        # resize the image
+        resized = cv2.resize(image, dim, interpolation = inter)
+
+        # return the resized image
+        return resized
+
+    def save_projected_lidar_labels(self, camera_image, frame):
+        """Save pre-projected 3D laser labels as cropped images."""
+        label_list = []
+        label_id_list = []
+        bb_boxes_list = []
+
+        for projected_labels in frame.projected_lidar_labels:
+            # Ignore camera labels that do not correspond to this camera.
+            if projected_labels.name != camera_image.name:
+                continue
+
+            # Iterate over the individual labels.
+            for label in projected_labels.labels:
+                if label.type!= 1: continue # 'VEHICLE'
+
+            img = tf.image.decode_jpeg(camera_image.image).numpy()# tensor to numpy
+            im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            width, height, channel = im_rgb.shape
+
+            # print(im_rgb.shape) # Print image shape
+            
+            x_1 = round(label.box.center_x - label.box.length / 2)
+            y_1 = round(label.box.center_y - label.box.width / 2)
+            x_2 = round(label.box.center_x + label.box.length / 2 )
+            y_2 = round(label.box.center_y + label.box.width / 2 )
+
+            # print(x_1,y_1,x_2,y_2)
+
+            # # Turn off this line while output, otherwise green surrounding box
+            # im_rgb_rectangle = cv2.rectangle(im_rgb,(x_1,y_1),(x_2,y_2),(0,255,0),2)
+            # cv2_imshow(im_rgb_rectangle)
+
+            # Cropping an image
+            cropped_image = im_rgb[y_1:y_2, x_1:x_2]
+            dim = (int(height/10), int(width/10))
+                
+            # resize image
+            # cropped_image = cv2.resize(cropped_image, dim, interpolation = cv2.INTER_AREA)
+            cropped_image = self.image_resize(cropped_image, height = dim[0])
+
+            ## Display cropped image
+            # cv2_imshow(cropped_image)
+            # print(type(cropped_image)) 
+
+            label_list.append(cropped_image)
+            label_id_list.append(label.id)
+            bb_boxes_list.append(np.array([x_1, y_1, x_2, y_2]))
+            # print(len(label_list))
+        return label_list, label_id_list, bb_boxes_list
+
+    def save_camera_2d_image(self, camera_image, frame, camera_labels, cmap=None ):
+        """Save a camera image and the given camera labels as cropped images."""
+        label_list = []
+        bb_boxes_list = []
+        # Draw the camera labels.
+        for camera_labels in frame.camera_labels:
+            # Ignore camera labels that do not correspond to this camera.
+            if camera_labels.name != camera_image.name:
+                continue
+
+            # Iterate over the individual labels.
+            for label in camera_labels.labels:
+                if label.type!= 1: continue # 'VEHICLE'
+                
+                # print(label)
+                
+                img = tf.image.decode_jpeg(camera_image.image).numpy()# tensor to numpy
+                im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                width, height, channel = im_rgb.shape
+
+                # print(im_rgb.shape) # Print image shape
+                
+                x_1 = round(label.box.center_x - label.box.length / 2)
+                y_1 = round(label.box.center_y - label.box.width / 2)
+                x_2 = round(label.box.center_x + label.box.length / 2 )
+                y_2 = round(label.box.center_y + label.box.width / 2 )
+
+                # print(x_1,y_1,x_2,y_2)
+
+                # # Turn off this line while output, otherwise green surrounding box
+                # im_rgb_rectangle = cv2.rectangle(im_rgb,(x_1,y_1),(x_2,y_2),(0,255,0),2)
+                # cv2_imshow(im_rgb_rectangle)
+
+                # Cropping an image
+                cropped_image = im_rgb[y_1:y_2, x_1:x_2]
+                dim = (int(height/10), int(width/10))
+                    
+                # resize image
+                # cropped_image = cv2.resize(cropped_image, dim, interpolation = cv2.INTER_AREA)
+                cropped_image = self.image_resize(cropped_image, height = dim[0])
+
+                # # Display cropped image
+                # cv2_imshow(cropped_image)
+                # # print(type(cropped_image)) 
+
+                label_list.append(cropped_image)
+                # print(len(label_list))
+                # bb_boxes_list.append(np.array([x_1, y_1, x_2, y_2]))
+                bb_boxes_list.append([x_1, y_1, x_2, y_2])
+
+        return label_list, bb_boxes_list
+
+    def get_iou(self, ground_truth, pred):
+        # coordinates of the area of intersection.
+        ix1 = np.maximum(ground_truth[0], pred[0])
+        iy1 = np.maximum(ground_truth[1], pred[1])
+        ix2 = np.minimum(ground_truth[2], pred[2])
+        iy2 = np.minimum(ground_truth[3], pred[3])
+        
+        # Intersection height and width.
+        i_height = np.maximum(iy2 - iy1 + 1, np.array(0.))
+        i_width = np.maximum(ix2 - ix1 + 1, np.array(0.))
+        
+        area_of_intersection = i_height * i_width
+        
+        # Ground Truth dimensions.
+        gt_height = ground_truth[3] - ground_truth[1] + 1
+        gt_width = ground_truth[2] - ground_truth[0] + 1
+        
+        # Prediction dimensions.
+        pd_height = pred[3] - pred[1] + 1
+        pd_width = pred[2] - pred[0] + 1
+        
+        area_of_union = gt_height * gt_width + pd_height * pd_width - area_of_intersection
+        
+        iou = area_of_intersection / area_of_union
+        
+        return iou
+
+    def save_label(self, frame, file_idx, frame_idx, global_id_label_concat):
         """ parse and save the label data in .txt format
                 :param frame: open dataset frame proto
                 :param file_idx: the current file number
                 :param frame_idx: the current frame number
+                :param global_id_label_concat: Given this numpy segmentation map annoated by global id to locate global id for each 2D bounding box
                 :return:
                 """
         # fp_label_all = open(self.label_all_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt', 'w+')
+        
+        id_to_camera_bbox = dict()
+        for image in frame.images:
+            
+            lidar_list, label_id_list, camera_list, lidar_bb, camera_bb = [], [],[],[],[]
+            lidar_list, label_id_list, lidar_bb = self.save_projected_lidar_labels(image, frame)
+            # print(image.name,': lidar_list:',len(lidar_list))
+            camera_list, camera_bb = self.save_camera_2d_image(image, frame, frame.camera_labels)
+            # print(image.name,': camera_list:',len(camera_list))
+            
+            if len(lidar_list) and len(camera_list)>0:
+                for i,lidar in enumerate(lidar_list):
+                    rank_list = []
+                    for j,camera_patch in enumerate(camera_list):                        
+                        IoU = self.get_iou(camera_bb[j], lidar_bb[i])
+                        rank_list.append(IoU)
+
+                    # print(round(rank_list[np.argmax(rank_list)],2),rank_list)
+                    if round(rank_list[np.argmax(rank_list)]) > 0.3:
+                        # cv2_imshow(lidar)
+                        # cv2_imshow(camera_list[np.argmax(rank_list)])
+                        id_to_camera_bbox[label_id_list[i]] = camera_bb[np.argmax(rank_list)]
+
+            break # output the front camera only
+
         # preprocess bounding box data
-        id_to_bbox = dict()
+        # id_to_bbox = dict()
         id_to_name = dict()
         for labels in frame.projected_lidar_labels:
             name = labels.name
             for label in labels.labels:
-                # waymo: bounding box origin is at the center
-                # TODO: need a workaround as bbox may not belong to front cam
-                bbox = [label.box.center_x - label.box.length / 2, label.box.center_y - label.box.width / 2,
-                        label.box.center_x + label.box.length / 2, label.box.center_y + label.box.width / 2]
-                id_to_bbox[label.id] = bbox
+                # # waymo: bounding box origin is at the center
+                # # TODO: need a workaround as bbox may not belong to front cam
+                # bbox = [label.box.center_x - label.box.length / 2, label.box.center_y - label.box.width / 2,
+                #         label.box.center_x + label.box.length / 2, label.box.center_y + label.box.width / 2]
+                # id_to_bbox[label.id] = bbox
                 id_to_name[label.id] = name - 1
 
+        tid = global_id_label_concat[label.box.center_x][label.box.center_y]
+        
         # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
         file_name = self.label_save_dir + '/' + str(file_idx).zfill(4) + self.prefix + '_clone' + '.txt'
 
@@ -424,8 +647,9 @@ class WaymoToKITTI(object):
             name = None
             id = obj.id
             for lidar in self.lidar_list:
-                if id + lidar in id_to_bbox:
-                    bounding_box = id_to_bbox.get(id + lidar)
+                # if id + lidar in id_to_bbox:
+                if id + lidar in id_to_camera_bbox:
+                    bounding_box = id_to_camera_bbox.get(id + lidar)
                     name = str(id_to_name.get(id + lidar))
                     break
 
@@ -509,7 +733,7 @@ class WaymoToKITTI(object):
             alpha = -10
 
             # save the labels
-            line = str(frame_idx) +' '+ my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+            line = str(frame_idx) + tid +' ' + ' '+ my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
                                                                                                         occluded,
                                                                                                         round(alpha, 2),
                                                                                                         round(bounding_box[0], 2),
@@ -574,7 +798,7 @@ class WaymoToKITTI(object):
                 :param frame: open dataset frame proto
                 :param file_idx: the current file number
                 :param frame_idx: the current frame number
-                :return:
+                :return: global_id_label_concat: A numpy segmentation map annoated by global id
         """
         frames_with_seg = []
         sequence_id = None
@@ -754,7 +978,8 @@ class WaymoToKITTI(object):
                         frame_obj_id.append(id)
                     else:
                         pass
-
+        return global_id_label_concat
+    
     def create_folder(self):
         # for d in [self.label_all_save_dir, self.calib_save_dir, self.point_cloud_save_dir, self.pose_save_dir]:
         for d in [self.calib_save_dir, self.pose_save_dir, self.pvp_save_dir]:
