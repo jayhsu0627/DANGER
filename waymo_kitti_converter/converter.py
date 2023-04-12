@@ -600,7 +600,8 @@ class WaymoToKITTI(object):
                 #         label.box.center_x + label.box.length / 2, label.box.center_y + label.box.width / 2]
                 # id_to_bbox[label.id] = bbox
                 id_to_name[label.id] = name - 1
-        
+        print(id_to_name)
+
         # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
         file_name = self.label_save_dir + '/' + str(file_idx).zfill(4) + self.prefix + '_clone' + '.txt'
 
