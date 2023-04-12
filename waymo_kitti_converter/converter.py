@@ -649,7 +649,7 @@ class WaymoToKITTI(object):
             # converter
             # 264, 59, 24, 16, 51, 268, 24, 847, 149, 28, 6, 13, 30, 45, \
             # 64, 192, 353, 229, 1848, 2, 48
-            print(global_id_label_concat)
+            print(global_id_label_concat.shape)
             tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
