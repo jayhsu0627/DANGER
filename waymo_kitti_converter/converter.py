@@ -803,7 +803,7 @@ class WaymoToKITTI(object):
         """
         frames_with_seg = []
         sequence_id = None
-        # global_id_label_concat = []
+        global_id_label_concat = []
 
         # Save frames which contain CameraSegmentationLabel messages. We assume that
         # if the first image has segmentation labels, all images in this frame will.
