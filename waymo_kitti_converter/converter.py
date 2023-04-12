@@ -623,7 +623,7 @@ class WaymoToKITTI(object):
                     bounding_box = id_to_camera_bbox.get(id + lidar)
                     name = str(id_to_name.get(id + lidar))
                     break
-
+            print(bounding_box)
             # TODO: temp fix
             if bounding_box == None or name == None:
                 name = '0'
