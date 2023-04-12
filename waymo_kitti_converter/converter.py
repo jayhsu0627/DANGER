@@ -564,11 +564,11 @@ class WaymoToKITTI(object):
         id_to_camera_bbox = dict()
         for image in frame.images:
             
-            lidar_list, label_id_list, camera_list, lidar_bb, camera_bb = [], [],[],[],[]
+            lidar_list, label_id_list, camera_list, lidar_bb, camera_bb = [],[],[],[],[]
             lidar_list, label_id_list, lidar_bb = self.save_projected_lidar_labels(image, frame)
-            # print(image.name,': lidar_list:',len(lidar_list))
+            print(image.name,': lidar_list:',len(lidar_list))
             camera_list, camera_bb = self.save_camera_2d_image(image, frame, frame.camera_labels)
-            # print(image.name,': camera_list:',len(camera_list))
+            print(image.name,': camera_list:',len(camera_list))
             
             if len(lidar_list) and len(camera_list)>0:
                 for i,lidar in enumerate(lidar_list):
@@ -654,7 +654,7 @@ class WaymoToKITTI(object):
             print(bounding_box)
             # tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
             print(global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)])
-            
+
             tid = global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)][0]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
