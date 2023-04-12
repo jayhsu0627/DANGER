@@ -437,39 +437,39 @@ class WaymoToKITTI(object):
             for label in projected_labels.labels:
                 if label.type!= 1: continue # 'VEHICLE'
 
-            img = tf.image.decode_jpeg(camera_image.image).numpy()# tensor to numpy
-            im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            width, height, channel = im_rgb.shape
+                img = tf.image.decode_jpeg(camera_image.image).numpy()# tensor to numpy
+                im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                width, height, channel = im_rgb.shape
 
-            # print(im_rgb.shape) # Print image shape
-            
-            x_1 = round(label.box.center_x - label.box.length / 2)
-            y_1 = round(label.box.center_y - label.box.width / 2)
-            x_2 = round(label.box.center_x + label.box.length / 2 )
-            y_2 = round(label.box.center_y + label.box.width / 2 )
-
-            # print(x_1,y_1,x_2,y_2)
-
-            # # Turn off this line while output, otherwise green surrounding box
-            # im_rgb_rectangle = cv2.rectangle(im_rgb,(x_1,y_1),(x_2,y_2),(0,255,0),2)
-            # cv2_imshow(im_rgb_rectangle)
-
-            # Cropping an image
-            cropped_image = im_rgb[y_1:y_2, x_1:x_2]
-            dim = (int(height/10), int(width/10))
+                # print(im_rgb.shape) # Print image shape
                 
-            # resize image
-            # cropped_image = cv2.resize(cropped_image, dim, interpolation = cv2.INTER_AREA)
-            cropped_image = self.image_resize(cropped_image, height = dim[0])
+                x_1 = round(label.box.center_x - label.box.length / 2)
+                y_1 = round(label.box.center_y - label.box.width / 2)
+                x_2 = round(label.box.center_x + label.box.length / 2 )
+                y_2 = round(label.box.center_y + label.box.width / 2 )
 
-            ## Display cropped image
-            # cv2_imshow(cropped_image)
-            # print(type(cropped_image)) 
+                # print(x_1,y_1,x_2,y_2)
 
-            label_list.append(cropped_image)
-            label_id_list.append(label.id)
-            bb_boxes_list.append(np.array([x_1, y_1, x_2, y_2]))
-            # print(len(label_list))
+                # # Turn off this line while output, otherwise green surrounding box
+                # im_rgb_rectangle = cv2.rectangle(im_rgb,(x_1,y_1),(x_2,y_2),(0,255,0),2)
+                # cv2_imshow(im_rgb_rectangle)
+
+                # Cropping an image
+                cropped_image = im_rgb[y_1:y_2, x_1:x_2]
+                dim = (int(height/10), int(width/10))
+                    
+                # resize image
+                # cropped_image = cv2.resize(cropped_image, dim, interpolation = cv2.INTER_AREA)
+                cropped_image = self.image_resize(cropped_image, height = dim[0])
+
+                ## Display cropped image
+                # cv2_imshow(cropped_image)
+                # print(type(cropped_image)) 
+
+                label_list.append(cropped_image)
+                label_id_list.append(label.id)
+                bb_boxes_list.append(np.array([x_1, y_1, x_2, y_2]))
+                # print(len(label_list))
         return label_list, label_id_list, bb_boxes_list
 
     def save_camera_2d_image(self, camera_image, frame, camera_labels, cmap=None ):
@@ -578,7 +578,9 @@ class WaymoToKITTI(object):
                         rank_list.append(IoU)
 
                     # print(round(rank_list[np.argmax(rank_list)],2),rank_list)
-                    if round(rank_list[np.argmax(rank_list)]) > 0.3:
+                    # if round(rank_list[np.argmax(rank_list)]) > 0.3:
+                    if max(rank_list)>0.4:
+
                         # cv2_imshow(lidar)
                         # cv2_imshow(camera_list[np.argmax(rank_list)])
                         id_to_camera_bbox[label_id_list[i]] = camera_bb[np.argmax(rank_list)]
