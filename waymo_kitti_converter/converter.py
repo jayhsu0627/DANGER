@@ -704,20 +704,20 @@ class WaymoToKITTI(object):
 
             # save the labels
             print(frame_idx,tid,my_type,truncated,occluded,alpha,bounding_box,height,width,length,x,y,z,rotation_y)
-            line = str(frame_idx) + tid + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
-                                                                                                        occluded,
-                                                                                                        round(alpha, 2),
-                                                                                                        round(bounding_box[0], 2),
-                                                                                                        round(bounding_box[1], 2),
-                                                                                                        round(bounding_box[2], 2),
-                                                                                                        round(bounding_box[3], 2),
-                                                                                                        round(height, 2),
-                                                                                                        round(width, 2),
-                                                                                                        round(length, 2),
-                                                                                                        round(x, 2),
-                                                                                                        round(y, 2),
-                                                                                                        round(z, 2),
-                                                                                                        round(rotation_y, 2))
+            line = str(frame_idx) +' {}'.format(tid) + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+                                                                                                                            occluded,
+                                                                                                                            round(alpha, 2),
+                                                                                                                            round(bounding_box[0], 2),
+                                                                                                                            round(bounding_box[1], 2),
+                                                                                                                            round(bounding_box[2], 2),
+                                                                                                                            round(bounding_box[3], 2),
+                                                                                                                            round(height, 2),
+                                                                                                                            round(width, 2),
+                                                                                                                            round(length, 2),
+                                                                                                                            round(x, 2),
+                                                                                                                            round(y, 2),
+                                                                                                                            round(z, 2),
+                                                                                                                            round(rotation_y, 2))
             if save_track_id:
                 line_all = line[:-1] + ' ' + name + ' ' + track_id + '\n'
             else:
