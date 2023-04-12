@@ -168,7 +168,9 @@ class WaymoToKITTI(object):
             if selected_waymo_locations is not None and frame.context.stats.location not in selected_waymo_locations:
                 continue
 
-            global_id_label_concat = np.zeros(5)
+            # Only output the labels for the frame has segmentation labels
+            if not frame.images[0].camera_segmentation_label.panoptic_label: continue
+
             # save images
             self.save_image(frame, file_idx, frame_idx)
 
