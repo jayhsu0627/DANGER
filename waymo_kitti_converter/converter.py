@@ -180,7 +180,7 @@ class WaymoToKITTI(object):
 
             # parse 2D Panoramic Video Panoptic Segmentation files
             global_id_label_concat = self.save_2D_semantic(frame, file_idx, frame_idx, frame_obj_id, segment_class)
-
+            
             # parse label files
             self.save_label(frame, file_idx, frame_idx, global_id_label_concat)
 
@@ -803,7 +803,7 @@ class WaymoToKITTI(object):
         """
         frames_with_seg = []
         sequence_id = None
-        global_id_label_concat = []
+        global_id_label_concat = np.zeros(5)
 
         # Save frames which contain CameraSegmentationLabel messages. We assume that
         # if the first image has segmentation labels, all images in this frame will.
