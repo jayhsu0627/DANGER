@@ -584,7 +584,8 @@ class WaymoToKITTI(object):
                         id_to_camera_bbox[label_id_list[i]] = camera_bb[np.argmax(rank_list)]
 
             break # output the front camera only
-
+        
+        print(id_to_camera_bbox)
         # preprocess bounding box data
         # id_to_bbox = dict()
         id_to_name = dict()
@@ -773,7 +774,7 @@ class WaymoToKITTI(object):
         """
         frames_with_seg = []
         sequence_id = None
-        global_id_label_concat = np.zeros(5)
+        # global_id_label_concat = np.zeros(5)
 
         # Save frames which contain CameraSegmentationLabel messages. We assume that
         # if the first image has segmentation labels, all images in this frame will.
