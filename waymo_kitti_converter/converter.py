@@ -155,6 +155,7 @@ class WaymoToKITTI(object):
         frame_obj_id = []
         # Avoid repeat segmentation class in the output text file
         segment_class = []
+        global_id_label_concat = []
 
         # if output_path is not None:
         # cur_det_file = output_path + ('%s_clone_scenegt_rgb_encoding.txt' % segment_name)
@@ -628,8 +629,6 @@ class WaymoToKITTI(object):
                 #         label.box.center_x + label.box.length / 2, label.box.center_y + label.box.width / 2]
                 # id_to_bbox[label.id] = bbox
                 id_to_name[label.id] = name - 1
-
-        tid = global_id_label_concat[label.box.center_x][label.box.center_y]
         
         # file_name = self.label_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.txt'
         file_name = self.label_save_dir + '/' + str(file_idx).zfill(4) + self.prefix + '_clone' + '.txt'
@@ -682,6 +681,8 @@ class WaymoToKITTI(object):
             # converter
             # 264, 59, 24, 16, 51, 268, 24, 847, 149, 28, 6, 13, 30, 45, \
             # 64, 192, 353, 229, 1848, 2, 48
+            
+            tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
 
@@ -802,6 +803,7 @@ class WaymoToKITTI(object):
         """
         frames_with_seg = []
         sequence_id = None
+        global_id_label_concat = []
 
         # Save frames which contain CameraSegmentationLabel messages. We assume that
         # if the first image has segmentation labels, all images in this frame will.
