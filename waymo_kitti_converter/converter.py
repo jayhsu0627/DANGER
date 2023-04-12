@@ -652,7 +652,10 @@ class WaymoToKITTI(object):
             # 64, 192, 353, 229, 1848, 2, 48
             print(global_id_label_concat.shape)
             print(bounding_box)
-            tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
+            # tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
+            print(global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)])
+            
+            tid = global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)][0]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
 
@@ -774,7 +777,6 @@ class WaymoToKITTI(object):
         """
         frames_with_seg = []
         sequence_id = None
-        # global_id_label_concat = np.zeros(5)
 
         # Save frames which contain CameraSegmentationLabel messages. We assume that
         # if the first image has segmentation labels, all images in this frame will.
@@ -853,7 +855,8 @@ class WaymoToKITTI(object):
                 global_id_label_concat = np.vectorize(remapped_instance_ids_switch.get)(instance_label_concat)
                 global_id_label_concat = np.nan_to_num(np.array(global_id_label_concat,dtype=float)).astype(int) # Convert None into nan by float, then convert nan to 0 by int
                 # convert ndarray global_id_label_concat into, instance_labels-like, list mode
-                global_id_labels = global_id_label_concat.tolist()
+                
+                # global_id_labels = global_id_label_concat.tolist()
                 global_label_rgb = camera_segmentation_utils.panoptic_label_to_rgb(
                     semantic_label_concat, global_id_label_concat)
 
