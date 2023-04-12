@@ -389,40 +389,6 @@ class WaymoToKITTI(object):
         pc_path = self.point_cloud_save_dir + '/' + self.prefix + str(file_idx).zfill(3) + str(frame_idx).zfill(3) + '.bin'
         point_cloud.astype(np.float32).tofile(pc_path)  # note: must save as float32, otherwise loading errors
 
-    # from waymo_open_dataset.utils import keypoint_data
-
-
-    # # Data location - please edit. Should point to a tfrecord containing tf.Example
-    # # protos as downloaded from the Waymo Open Dataset website.
-
-    # # FILENAME = '/content/data/individual_files/training/segment-10017090168044687777_6380_000_6400_000_with_camera_labels.tfrecord'
-    # FILENAME = '/content/data/individual_files/training/segment-1146261869236413282_1680_000_1700_000_with_camera_labels.tfrecord'
-    # # FILENAME = '/content/data/individual_files/training/segment-10526338824408452410_5714_660_5734_660_with_camera_labels.tfrecord'
-    # # FILENAME = '/content/waymo-od/tutorial/frame_with_keypoints.tfrecord'
-
-
-    # # Read a random frame
-
-    # dataset = tf.data.TFRecordDataset(FILENAME, compression_type='')
-    # dataset_iter = dataset.as_numpy_iterator()
-
-    # # Get a specific frame from the segment.
-    # local_frame_count = np.random.randint(1,200)
-    # for i in range(local_frame_count):
-    # data = next(dataset_iter)
-    # frame = open_dataset.Frame()
-    # frame.ParseFromString(data)
-    # print(frame.context.name, frame.timestamp_micros)
-
-    # FILTER_AVAILABLE = any(
-    #     [label.num_top_lidar_points_in_box > 0 for label in frame.laser_labels])
-
-    # if not FILTER_AVAILABLE:
-    # print('WARNING: num_top_lidar_points_in_box does not seem to be populated. '
-    #         'Make sure that you are using an up-to-date release (V1.3.2 or later) '
-    #         'to enable improved filtering of occluded objects.')
-    
-
     def image_resize(self, image, width = None, height = None, inter = cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and
         # grab the image size
@@ -681,7 +647,7 @@ class WaymoToKITTI(object):
             # converter
             # 264, 59, 24, 16, 51, 268, 24, 847, 149, 28, 6, 13, 30, 45, \
             # 64, 192, 353, 229, 1848, 2, 48
-            print(global_id_label_concat.shape)
+            print(global_id_label_concat)
             tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
