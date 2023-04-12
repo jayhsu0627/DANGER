@@ -651,7 +651,7 @@ class WaymoToKITTI(object):
             # 64, 192, 353, 229, 1848, 2, 48
             print(global_id_label_concat.shape)
             print(bounding_box)
-            tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)]
+            tid = global_id_label_concat[int((bounding_box[0]+bounding_box[2])/2)][int((bounding_box[1]+bounding_box[3])/2)][0]
 
             my_type = self.waymo_to_kitti_class_map[my_type]
 
