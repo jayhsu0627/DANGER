@@ -30,8 +30,7 @@ conda activate 3dsdn
 
 
 echo "Install gcc-6 "
-sudo -i
-cd /pvc-ssd/Danger_model
+
 echo "deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe" >> /etc/apt/sources.list
 sudo apt-get update
 
@@ -47,7 +46,7 @@ sudo update-alternatives --config gcc
 
 echo "Install cuda 9.0 "
 wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
 apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
 apt-get update
 apt-get install cuda=9.0.176-1
