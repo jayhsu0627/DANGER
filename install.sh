@@ -16,8 +16,7 @@ cat /etc/os-release
 
 echo "Install conda environment '3dsdn' "
 cd /pvc-ssd/Danger_model
-if [ -d "/pvc-ssd/Danger_model/DANGER" ] 
-  then
+if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
     git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
