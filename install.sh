@@ -26,9 +26,15 @@ fi
 conda config --append channels conda-forge
 conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
 conda env list
+eval "$(conda shell.bash hook)"
 conda activate 3dsdn
 
+
 echo "Install gcc-6 "
+sudo -i
+cd /pvc-ssd/Danger_model
+echo "deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe" >> /etc/apt/sources.list
+sudo apt-get update
 
 sudo apt-get install gcc-6 g++-6 g++-6-multilib gfortran-6
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
@@ -53,7 +59,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
 
 echo "Verification of cuda 9.0"
 
+echo "==================== Nvidia Driver =================="
 nvidia-smi
+echo "==================== Python ========================="
 python -V
+echo "==================== nvcc Driver ===================="
 nvcc --version
 rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
