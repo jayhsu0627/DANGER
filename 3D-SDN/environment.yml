@@ -4,6 +4,7 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  - python=3.6
   - absl-py=0.2.2
   - chainer=4.1.0
   - cupy=4.1.0
@@ -24,3 +25,5 @@ dependencies:
   - tensorboardx=1.4
   - torchvision=0.2.1
   - tqdm=4.23.4
+  - pip:
+    - gdown==4.7.1
