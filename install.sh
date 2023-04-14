@@ -15,16 +15,17 @@ cat /etc/os-release
 
 
 echo "Install conda environment '3dsdn' "
-cd ~/pvc-ssd/Danger_model
-if [ -d "~/pvc-ssd/Danger_model/DANGER" ] 
+cd /pvc-ssd/Danger_model
+if [ -d "/pvc-ssd/Danger_model/DANGER" ] 
   then
     git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
 
 conda config --append channels conda-forge
-conda env create --name 3dsdn --file ~/pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
+conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
 conda env list
+conda activate 3dsdn
 
 echo "Install gcc-6 "
 
