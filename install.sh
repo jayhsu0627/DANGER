@@ -21,6 +21,7 @@ if [ -d "/pvc-ssd/Danger_model/DANGER" ]
     git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
+fi
 
 conda config --append channels conda-forge
 conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
