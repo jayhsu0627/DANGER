@@ -82,7 +82,7 @@ time: 2min 19s (started: 2022-06-05 01:12:42 +00:00)
 We host our tutorial notebooks on Colab, and we suggest you initialize your vm with a GPU when you setup the 3D-SDN environment.
 
 ```
-chmod 755 ./DANGER/install.sh
+sudo chmod 755 ./DANGER/install.sh
 ./DANGER/install.sh
 ```
 1 [3D-SDN environment](https://github.com/jayhsu0627/DANGER/blob/main/docs/CUDA9_3D_SDN.ipynb)

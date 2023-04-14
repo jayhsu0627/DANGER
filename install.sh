@@ -31,7 +31,7 @@ conda activate 3dsdn
 
 echo "Install gcc-6 "
 
-echo "deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe" >> /etc/apt/sources.list
+sudo su -c "echo 'deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe' >> /etc/apt/sources.list"
 sudo apt-get update
 
 sudo apt-get install gcc-6 g++-6 g++-6-multilib gfortran-6
