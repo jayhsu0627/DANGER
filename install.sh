@@ -26,7 +26,6 @@ conda config --append channels conda-forge
 conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
 conda env list
 eval "$(conda shell.bash hook)"
-conda activate 3dsdn
 
 
 echo "Install gcc-6 "
@@ -45,15 +44,15 @@ sudo update-alternatives --config gcc
 # rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
 
 echo "Install cuda 9.0 "
-wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
-apt-get update
-apt-get install cuda=9.0.176-1
+# wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+# sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+# apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
+# apt-get update
+# apt-get install cuda=9.0.176-1
 
-export PATH=$PATH:/usr/local/cuda-9.0/bin
-export CUDADIR=/usr/local/cuda-9.0
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
+# export PATH=$PATH:/usr/local/cuda-9.0/bin
+# export CUDADIR=/usr/local/cuda-9.0
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
 
 echo "Verification of cuda 9.0"
 
@@ -64,3 +63,4 @@ python -V
 echo "==================== nvcc Driver ===================="
 nvcc --version
 rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+conda activate 3dsdn

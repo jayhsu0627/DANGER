@@ -3,6 +3,7 @@ channels:
   - hcc
   - defaults
   - conda-forge
+  - pytorch
 dependencies:
   - python=3.6
   - absl-py=0.2.2
@@ -17,7 +18,9 @@ dependencies:
   - pillow=5.0.0
   - py-opencv=3.4.1
   - python=3.6.6
-  - pytorch=0.4.0
+  # - pytorch=0.4.0
+  - pytorch=0.4.1
+  - cuda92
   - scikit-image=0.13.1
   - scikit-learn=0.19.1
   - scipy=1.0.1
