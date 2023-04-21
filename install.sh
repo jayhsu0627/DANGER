@@ -17,8 +17,9 @@ cat /etc/os-release
 echo "Install conda environment '3dsdn' "
 cd /pvc-ssd/Danger_model
 if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
-    git reset --hard
-    git pull
+    # git reset --hard
+    git checkout HEAD -- /pvc-ssd/Danger_model/DANGER
+    # git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
 fi
