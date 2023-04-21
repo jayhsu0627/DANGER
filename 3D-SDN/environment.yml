@@ -19,14 +19,18 @@ dependencies:
   - py-opencv=3.4.1
   - python=3.6.6
   # - pytorch=0.4.0
-  - pytorch=0.4.1
-  - cuda92
+  # - pytorch=0.4.1
+  # - cuda92
+  - pytorch=1.7.0
+  - cudatoolkit=11.0
+  # /opt/conda/bin/conda install -y -c pytorch cudatoolkit=11.0 "pytorch=1.7.0=py3.6_cuda110_cudnn8_0" torchvision=0.8.0 torchaudio==0.7.0 && \
   - scikit-image=0.13.1
   - scikit-learn=0.19.1
   - scipy=1.0.1
   - tensorboard=1.8.0
   - tensorboardx=1.4
-  - torchvision=0.2.1
+  # - torchvision=0.2.1
+  - torchvision=0.8.0
   - tqdm=4.23.4
   - pip:
     - gdown==4.7.1

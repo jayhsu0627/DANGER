@@ -17,11 +17,12 @@ cat /etc/os-release
 echo "Install conda environment '3dsdn' "
 cd /pvc-ssd/Danger_model
 if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
+    git reset --hard
     git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
 fi
-git init
+# git init
 conda config --append channels conda-forge
 conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
 conda env list
@@ -43,7 +44,7 @@ sudo update-alternatives --config gcc
 # rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb || true
 # rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
 
-echo "Install cuda 9.0 "
+echo "Install pytorch and cuda 9.2 "
 # wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
 # sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
 # apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
