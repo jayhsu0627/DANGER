@@ -27,6 +27,8 @@ conda config --append channels conda-forge
 conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
 conda env list
 eval "$(conda shell.bash hook)"
+conda activate 3dsdn
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 -c pytorch
 
 
 echo "Install gcc-6 "
