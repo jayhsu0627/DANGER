@@ -45,17 +45,19 @@ sudo update-alternatives --config gcc
 # rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb.1 || true
 # rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb || true
 # rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
+gcc --version
 
-echo "Install pytorch and cuda 9.2 "
-# wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-# sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-# apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
-# apt-get update
-# apt-get install cuda=9.0.176-1
+echo "Install pytorch and cuda 9.0 "
 
-# export PATH=$PATH:/usr/local/cuda-9.0/bin
-# export CUDADIR=/usr/local/cuda-9.0
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
+wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
+apt-get update
+apt-get install cuda=9.0.176-1
+
+export PATH=$PATH:/usr/local/cuda-9.0/bin
+export CUDADIR=/usr/local/cuda-9.0
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
 
 echo "Verification of cuda 9.0"
 
