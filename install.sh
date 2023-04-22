@@ -17,9 +17,10 @@ cat /etc/os-release
 echo "Install conda environment '3dsdn' "
 cd /pvc-ssd/Danger_model
 if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
-    # git reset --hard
-    git checkout HEAD -- /pvc-ssd/Danger_model/DANGER
-    # git pull
+    cd /pvc-ssd/Danger_model/DANGER
+    git reset --hard
+    # git checkout HEAD -- /pvc-ssd/Danger_model/DANGER
+    git pull
   else
     git clone https://github.com/jayhsu0627/DANGER
 fi
@@ -29,9 +30,6 @@ conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environ
 conda env list
 eval "$(conda shell.bash hook)"
 conda activate 3dsdn
-# conda install -y pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 -c pytorch
-conda install -y pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=11.0 -c pytorch
-
 
 echo "Install gcc-6 "
 
@@ -67,5 +65,7 @@ echo "==================== Python ========================="
 python -V
 echo "==================== nvcc Driver ===================="
 nvcc --version
-rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+# rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+
+eval "$(conda shell.bash hook)"
 conda activate 3dsdn
