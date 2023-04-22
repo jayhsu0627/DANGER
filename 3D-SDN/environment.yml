@@ -18,14 +18,14 @@ dependencies:
   - pillow=5.0.0
   - py-opencv=3.4.1
   - python=3.6.6
-  - pytorch=0.4.0
+  - pytorch=0.4.1
   - scikit-image=0.13.1
   - scikit-learn=0.19.1
   - scipy=1.0.1
-  - tensorboard=1.8.0
-  - tensorboardx=1.4
-  - torchvision=0.2.1
-  - torchaudio==0.7.0
+  # - tensorboard=1.8.0
+  # - tensorboardx=1.4
+  # - torchvision=0.2.1
+  # - torchaudio==0.7.0
   - cuda90
   - cudatoolkit=9.0
   - tqdm=4.23.4
