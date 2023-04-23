@@ -12,6 +12,7 @@ echo "==================== nvcc Driver ===================="
 nvcc --version
 echo "==================== OS ============================="
 cat /etc/os-release
+pip uninstall -y torch
 
 
 echo "Install conda environment '3dsdn' "
@@ -35,7 +36,7 @@ echo "Install gcc-6 "
 
 sudo su -c "echo 'deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe' >> /etc/apt/sources.list"
 sudo apt-get update
-sudo apt-get install gcc-6 g++-6 g++-6-multilib gfortran-6
+sudo apt-get install -y gcc-6 g++-6 g++-6-multilib gfortran-6
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
 sudo update-alternatives --config gcc
 gcc --version
@@ -48,7 +49,7 @@ rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb || true
 rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
 
 wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
 
 sudo apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
 sudo apt-get update
@@ -71,8 +72,7 @@ python -V
 echo "==================== nvcc Driver ===================="
 nvcc --version
 echo "==================== Pytorch ========================"
-pip uninstall torch
 
-eval "$(conda shell.bash hook)"
-conda activate 3dsdn
-python -c "import torch;print(torch.__version__)"
+# eval "$(conda shell.bash hook)"
+# conda activate 3dsdn
+python -c "import torch;print('torch version:',torch.__version__)"
