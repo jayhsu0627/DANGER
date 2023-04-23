@@ -41,35 +41,26 @@ sudo update-alternatives --config gcc
 gcc --version
 
 echo "Install cuda 9.0 "
-# # # remove if exists
-# rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb || true
-# rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb.1 || true
-# rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb || true
-# rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
+# # remove if exists
+rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb || true
+rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb.1 || true
+rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb || true
+rm -rf cuda-repo-ubuntu1704-9-0-local_9.0.176-1_amd64-deb.1 || true
 
-# wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-# sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-# sudo sh cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+sudo dpkg -i cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
 
-# wget https://developer.nvidia.com/compute/cuda/9.0/Prod/patches/4/cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb
-
-# sudo sh cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb
-
-# sudo apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
-# sudo apt-get update
-# sudo apt-get install cuda=9.0.176-1
-
-# export PATH=$PATH:/usr/local/cuda-9.0/bin
-# export CUDADIR=/usr/local/cuda-9.0
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
-
-# rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
-# rm -rf cuda-repo-ubuntu1704-9-0-176-local-patch-4_1.0-1_amd64-deb
-wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/cuda-repo-ubuntu1704_9.0.176-1_amd64.deb
-sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
-sudo apt-get remove nvidia-cuda-*
+sudo apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
 sudo apt-get update
-sudo apt-get install cuda
+sudo apt-get install cuda=9.0.176-1
+
+export PATH=$PATH:/usr/local/cuda-9.0/bin
+export CUDADIR=/usr/local/cuda-9.0
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64
+
+rm -rf cuda-repo-ubuntu1604-9-0-local_9.0.176-1_amd64-deb
+# sudo apt-get update
+# sudo apt-get install cuda
 
 echo "Verification of cuda 9.0"
 
@@ -79,6 +70,9 @@ echo "==================== Python ========================="
 python -V
 echo "==================== nvcc Driver ===================="
 nvcc --version
+echo "==================== Pytorch ========================"
+pip uninstall torch
 
 eval "$(conda shell.bash hook)"
 conda activate 3dsdn
+python -c "import torch;print(torch.__version__)"
