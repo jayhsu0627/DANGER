@@ -18,7 +18,7 @@ dependencies:
   - pillow=5.0.0
   - py-opencv=3.4.1
   - python=3.6.6
-  # - pytorch=0.4.1
+  - pytorch=0.4.1
   - scikit-image=0.13.1
   - scikit-learn=0.19.1
   - scipy=1.0.1
