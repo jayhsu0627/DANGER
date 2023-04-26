@@ -38,7 +38,7 @@ echo "Install gcc-6 "
 
 sudo su -c "echo 'deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe' >> /etc/apt/sources.list"
 sudo apt-get update
-sudo apt-get install -y gcc-6 g++-6 g++-6-multilib gfortran-6
+sudo apt-get install -y gcc-6 g++-6 g++-6-multilib gfortran-6 screen
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
 sudo update-alternatives --config gcc
 gcc --version
