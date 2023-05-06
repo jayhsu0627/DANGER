@@ -222,7 +222,7 @@ class WaymoToKITTI(object):
             if not isdir(img_folder_path):
                 os.makedirs(img_folder_path)
 
-            img_path = img_folder_path + str(frame_idx).zfill(3) + '.png'
+            img_path = img_folder_path + str(frame_idx).zfill(5) + '.png'
 
             img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
