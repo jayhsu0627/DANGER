@@ -907,7 +907,8 @@ class WaymoToKITTI(object):
             mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
             # print(mask_class.shape)
             mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
-            mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
+            # mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
+            mask_class_3d_mod = mask_class_3d
 
             # new_panoptic_label_rgb = panoptic_label_rgb
             new_panoptic_label_rgb = global_label_rgb * mask_id_3d_mod * mask_class_3d_mod
