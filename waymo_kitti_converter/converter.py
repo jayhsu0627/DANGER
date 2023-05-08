@@ -920,7 +920,7 @@ class WaymoToKITTI(object):
                                           (mask_class_3d==query_class_2) |
                                             (mask_class_3d==query_class_3) |
                                               (mask_class_3d==query_class_4) |
-                                                (mask_class_3d==query_class_5)
+                                                (mask_class_3d==query_class_5) |
                                                 (mask_class_3d==query_class_6) |
                                                 (mask_class_3d==query_class_7) |
                                                 (mask_class_3d==query_class_8) |
