@@ -883,9 +883,18 @@ class WaymoToKITTI(object):
             query_id_3 = 21
             query_id_4 = 22
 
-            # Car 2; Pedestrain 9
+            # Car 2; Truck 3;  Pedestrain 9
             query_class_1 = 2
-            query_class_2 = 2
+            query_class_2 = 9
+            query_class_3 = 3
+            query_class_4 = 4
+            query_class_5 = 5
+            query_class_6 = 6
+            query_class_7 = 7
+            query_class_8 = 8
+            query_class_9 = 10
+            query_class_10 = 11
+            query_class_11 = 16
 
 
             # # Find segmentation for instance ID
@@ -907,8 +916,18 @@ class WaymoToKITTI(object):
             mask_class = mask_class.reshape(mask_class.shape[0],mask_class.shape[1])
             # print(mask_class.shape)
             mask_class_3d = np.stack((mask_class,mask_class,mask_class),axis=2) #3 channel mask
-            # mask_class_3d_mod = np.where((mask_class_3d==query_class_1) | (mask_class_3d==query_class_2), 1, 0)
-            mask_class_3d_mod = mask_class_3d
+            mask_class_3d_mod = np.where((mask_class_3d==query_class_1) |
+                                          (mask_class_3d==query_class_2) |
+                                            (mask_class_3d==query_class_3) |
+                                              (mask_class_3d==query_class_4) |
+                                                (mask_class_3d==query_class_5)
+                                                (mask_class_3d==query_class_6) |
+                                                (mask_class_3d==query_class_7) |
+                                                (mask_class_3d==query_class_8) |
+                                                (mask_class_3d==query_class_9) |
+                                                (mask_class_3d==query_class_10) |
+                                                (mask_class_3d==query_class_11), 1, 0)
+            # mask_class_3d_mod = mask_class_3d
 
             # new_panoptic_label_rgb = panoptic_label_rgb
             new_panoptic_label_rgb = global_label_rgb * mask_id_3d_mod * mask_class_3d_mod
