@@ -226,6 +226,7 @@ class WaymoToKITTI(object):
 
             img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            rgb_img = rgb_img[:,:,:3] # remove alpha channel
             plt.imsave(img_path, rgb_img, format='png')
             break # output first camera only
 
