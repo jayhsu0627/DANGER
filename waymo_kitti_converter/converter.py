@@ -741,7 +741,7 @@ class WaymoToKITTI(object):
                                                                                                                             round(0, 2),
                                                                                                                             round(0, 2),
                                                                                                                             round(0, 2),
-                                                                                                                            round(0, 2)) + ' ' + my_type
+                                                                                                                            round(0, 2),my_type)
             if save_track_id:
                 line_all = line[:-1] + ' ' + name + ' ' + track_id + '\n'
             else:
