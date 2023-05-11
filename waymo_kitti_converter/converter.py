@@ -724,7 +724,7 @@ class WaymoToKITTI(object):
 
             # save the labels
             # print(frame_idx,tid,my_type,truncated,occluded,alpha,bounding_box,height,width,length,x,y,z,rotation_y)
-            line = str(frame_idx) +' {}'.format(tid) + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+            line = str(frame_idx) +' {}'.format(tid) + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
                                                                                                                             occluded,
                                                                                                                             round(alpha, 2),
                                                                                                                             round(bounding_box[0], 2),
