@@ -670,6 +670,8 @@ class WaymoToKITTI(object):
             # print(global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)])
 
             tid = global_id_label_concat[int((bounding_box[1]+bounding_box[3])/2)][int((bounding_box[0]+bounding_box[2])/2)][0]
+            if tid==0: 
+                continue
 
             my_type = self.waymo_to_kitti_class_map[my_type]
 
@@ -722,8 +724,7 @@ class WaymoToKITTI(object):
 
             # save the labels
             # print(frame_idx,tid,my_type,truncated,occluded,alpha,bounding_box,height,width,length,x,y,z,rotation_y)
-            
-            line = str(frame_idx) +' {}'.format(tid) + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
+            line = str(frame_idx) +' {}'.format(tid) + ' ' + my_type + ' {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n'.format(round(truncated, 2),
                                                                                                                             occluded,
                                                                                                                             round(alpha, 2),
                                                                                                                             round(bounding_box[0], 2),
@@ -736,7 +737,11 @@ class WaymoToKITTI(object):
                                                                                                                             round(x, 2),
                                                                                                                             round(y, 2),
                                                                                                                             round(z, 2),
-                                                                                                                            round(rotation_y, 2))
+                                                                                                                            round(rotation_y, 2),
+                                                                                                                            round(0, 2),
+                                                                                                                            round(0, 2),
+                                                                                                                            round(0, 2),
+                                                                                                                            round(0, 2)) + ' ' + my_type
             if save_track_id:
                 line_all = line[:-1] + ' ' + name + ' ' + track_id + '\n'
             else:
