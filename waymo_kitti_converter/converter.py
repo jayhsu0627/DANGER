@@ -946,7 +946,7 @@ class WaymoToKITTI(object):
             # img = cv2.imdecode(np.frombuffer(img.image, np.uint8), cv2.IMREAD_COLOR)
             # rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             # plt.imsave(pvp_path, panoptic_label_rgb, format='png')
-            plt.imsave(pvp_path, global_label_rgb, format='png')
+            plt.imsave(pvp_path, global_label_rgb[:,:,:3], format='png') # remove alpha channel
 
             # plt.grid(False)
             # plt.axis('off')
