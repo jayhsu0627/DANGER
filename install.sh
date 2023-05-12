@@ -14,26 +14,6 @@ echo "==================== OS ============================="
 cat /etc/os-release
 pip uninstall -y torch==1.13
 
-
-echo "Install conda environment '3dsdn' "
-cd /pvc-ssd/Danger_model
-if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
-    cd /pvc-ssd/Danger_model/DANGER
-    git reset --hard
-    # git checkout HEAD -- /pvc-ssd/Danger_model/DANGER
-    git pull
-  else
-    git clone https://github.com/jayhsu0627/DANGER
-fi
-# git init
-conda config --append channels conda-forge
-conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
-conda env list
-eval "$(conda shell.bash hook)"
-conda activate 3dsdn
-# pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.0-cp36-cp36m-linux_x86_64.whl
-# pip3 install torchvision
-
 echo "Install gcc-6 "
 
 sudo su -c "echo 'deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe' >> /etc/apt/sources.list"
@@ -83,6 +63,25 @@ echo "==================== nvcc Driver ===================="
 nvcc --version
 echo "==================== Pytorch ========================"
 
+echo "Install conda environment '3dsdn' "
+cd /pvc-ssd/Danger_model
+if [ -d "/pvc-ssd/Danger_model/DANGER" ]; then
+    cd /pvc-ssd/Danger_model/DANGER
+    git reset --hard
+    # git checkout HEAD -- /pvc-ssd/Danger_model/DANGER
+    git pull
+  else
+    git clone https://github.com/jayhsu0627/DANGER
+fi
+# git init
+conda config --append channels conda-forge
+conda env create --name 3dsdn --file /pvc-ssd/Danger_model/DANGER/3D-SDN/environment.yml
+conda env list
+eval "$(conda shell.bash hook)"
+conda activate 3dsdn
+# pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.0-cp36-cp36m-linux_x86_64.whl
+# pip3 install torchvision
 # eval "$(conda shell.bash hook)"
+
 # conda activate 3dsdn
 python -c "import torch;print('torch version:',torch.__version__)"
