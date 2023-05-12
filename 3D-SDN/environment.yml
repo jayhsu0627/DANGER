@@ -31,4 +31,6 @@ dependencies:
   - tqdm=4.23.4
   - pip:
     - gdown==4.7.1
+    - wandb
+
 
