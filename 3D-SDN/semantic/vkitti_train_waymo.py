@@ -289,7 +289,7 @@ if __name__ == '__main__':
     wandb.init(
     # set the wandb project where this run will be logged
     project="Waymo-project",
-    name="Textural",
+    name="Semantics",
     config =args)
 
     random.seed(args.seed)
