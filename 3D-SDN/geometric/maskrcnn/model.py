@@ -6,6 +6,7 @@ Copyright (c) 2017 Matterport, Inc.
 Licensed under the MIT License (see LICENSE for details)
 Written by Waleed Abdulla
 """
+import wandb
 
 import datetime
 import math
@@ -1962,6 +1963,12 @@ class MaskRCNN(nn.Module):
             if (batch_count % self.config.BATCH_SIZE) == 0:
                 optimizer.step()
                 batch_count = 0
+            wandb.log({'loss':loss.data.cpu()[0],
+                       'rpn_class_loss':rpn_class_loss.data.cpu()[0],
+                       'rpn_bbox_loss':rpn_bbox_loss.data.cpu()[0],
+                      'mrcnn_class_loss':mrcnn_class_loss.data.cpu()[0],
+                      'mrcnn_bbox_loss':mrcnn_bbox_loss.data.cpu()[0],
+                      'mrcnn_mask_loss':mrcnn_mask_loss.data.cpu()[0]})
 
             # Progress
             if ((step + 1) % self.config.DISPLAY_SIZE) == 0:
