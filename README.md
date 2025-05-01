@@ -111,11 +111,11 @@ We would like to thank the authors of `3D-SDN` for their open-source release.
 If you find this project useful in your research, please consider citing:
 
 ```
-@article{DANGER,
-    title={},
-    author={A and B},
-    journal = {Neurips},
-    year={2022}
+@inproceedings{xu2022framework,
+  title={A Framework for Generating Dangerous Scenes for Testing Robustness},
+  author={Xu, Shengjie and Mi, Lan and Gilpin, Leilani H},
+  booktitle={Progress and Challenges in Building Trustworthy Embodied AI},
+  year={2022}
 }
 
 ```
